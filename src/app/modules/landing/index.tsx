@@ -4,7 +4,6 @@ import MapComponent from "../../core/components/map";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { IoMenu } from "react-icons/io5";
 import { FaUserLock } from "react-icons/fa6";
-import bioBg from '../../../assets/biodiversity-gif.gif';
 import { BiMapPin } from "react-icons/bi";
 import { useSearchParams } from "react-router-dom";
 import Modal from "../../core/components/modal";
@@ -37,12 +36,24 @@ export default function Landing() {
     const [isShowMap, setIsShowMap] = useState<boolean>(false);
     // const toggleShowModal = () => setShowModal(!showModal);
     const toggleShowPanel = () => setShowPanel(!showPanel);
+    const [selectedCampusData, setSelectedCampusData] = useState<ICampus | null>(null);
+
+    const setRedirectCampusData = (campusId: string | number | undefined) => {
+        if (!campusId) {
+            const campusData = campuses.find(campus => campus.id?.toString() === campusId?.toString());
+            if (campusData) {
+                setSelectedCampusData(campusData);
+            }
+        }
+    };
 
     const initCampus = () => {
         if (campusId) {
             setSelectedCampusId(campusId);
+            setRedirectCampusData(campusId);
         } else {
             setSelectedCampusId(campuses[0]?.id);
+            setRedirectCampusData(campuses[0]?.id);
         }
     }
 
@@ -165,14 +176,17 @@ export default function Landing() {
             {
                 !isShowMap && (
                     <div style={{
-                        backgroundImage: `url(${bioBg})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
                         height: '100vh',
-                        width: '100vw'
+                        width: '100vw',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flexDirection: 'column',
+                        backgroundColor: 'white'
                     }}>
-
+                        <div className="text-lg">
+                            {selectedCampusData?.campus}
+                        </div>
                     </div>
                 )
             }
