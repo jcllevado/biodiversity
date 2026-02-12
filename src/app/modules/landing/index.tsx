@@ -1,9 +1,7 @@
 import { Fragment, useEffect, useState, useCallback } from "react";
 import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import MapComponent from "../../core/components/map";
-import { FaExternalLinkAlt } from "react-icons/fa";
 import { IoMenu, IoClose, IoHome } from "react-icons/io5";
-import { FaUserLock } from "react-icons/fa6";
 import { BiMapPin } from "react-icons/bi";
 import { FaSearch, FaLayerGroup } from "react-icons/fa";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -488,17 +486,6 @@ export default function Landing() {
                                             <p className="text-justify p-2 text-sm">
                                                 The USTP Biodiversity web application showcases a rich collection of specimens and exhibits dedicated to the study and conservation of biodiversity. It features detailed descriptions of various species, interactive exhibits, and educational resources that highlight the importance of preserving our natural heritage.
                                             </p>
-                                        </div>
-                                        <div className="flex flex-row items-center w-full px-2 pr-6 text-sm justify-center mb-2">
-                                            Links:
-                                            <a href="/admin" className="flex items-center text-blue-600 text-sm" target="_blank" rel="noopener noreferrer">
-                                                <FaUserLock size={12} className="m-2" />
-                                                Admin
-                                            </a>
-                                            <a href="https://ustp.edu.ph/" className="flex items-center text-blue-600 text-sm" target="_blank" rel="noopener noreferrer">
-                                                <FaExternalLinkAlt size={12} className="m-2" />
-                                                USTP Website
-                                            </a>
                                         </div>
                                         <div className="w-full text-center mb-2 text-xs">
                                             Copyright &copy; {date.getFullYear()} USTP Biodiversity Project
