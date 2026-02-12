@@ -2,7 +2,7 @@ import 'leaflet/dist/leaflet.css';
 import { FC, Fragment, useEffect, useState } from 'react';
 import L, { LatLngExpression } from "leaflet";
 import { MapContainer, Marker, TileLayer, useMap, ZoomControl, Tooltip } from "react-leaflet";
-import osmMaptiler from '../../constants/osm-maptiler';
+import  { mapLayers } from '../../constants/osm-maptiler';
 import mapPin from '../../../../assets/pin2.png'
 import schoolPin from '../../../../assets/schoolmap-pin.png'
 import birdIcon from '../../../../assets/svgs/bird.svg'
@@ -22,6 +22,7 @@ type MapComponentProps = {
     campuses: ICampus[];
     campusSpecies: ICampusSpecies[];
     handleModal: (data: ICampusSpecies) => void;
+    selectedMapLayer?: string;
 };
 
 
@@ -64,7 +65,7 @@ const createCategoryIcon = (category: string | undefined, isHighlighted: boolean
     });
 };
 
-const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleModal }) => {
+const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleModal, selectedMapLayer = 'satellite' }) => {
 
     const [searchParams] = useSearchParams();
     const campusId = searchParams.get('campusId');
@@ -208,8 +209,9 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
 
                 <MapContainer center={coordinates} zoom={getResponsiveZoom()} scrollWheelZoom={true} zoomControl={false}>
                     <TileLayer
-                        url={osmMaptiler.maptiler.url}
-                        attribution={osmMaptiler.maptiler.attribution}
+                        key={selectedMapLayer}
+                        url={mapLayers[selectedMapLayer as keyof typeof mapLayers]?.url || mapLayers.satellite.url}
+                        attribution={mapLayers[selectedMapLayer as keyof typeof mapLayers]?.attribution || mapLayers.satellite.attribution}
                     />
                     {
                         filteredCampusSpecies.map((data, index) => {

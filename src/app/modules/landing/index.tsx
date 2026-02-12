@@ -1,11 +1,11 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useCallback } from "react";
 import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import MapComponent from "../../core/components/map";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { IoMenu, IoClose } from "react-icons/io5";
 import { FaUserLock } from "react-icons/fa6";
 import { BiMapPin } from "react-icons/bi";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaLayerGroup } from "react-icons/fa";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Modal from "../../core/components/modal";
 import SpeciesDetails from "../../core/components/speciesdetails";
@@ -35,6 +35,9 @@ export default function Landing() {
     const toggleSearchModal = () => setSearchModal(!searchModal);
     const [campusModal, setCampusModal] = useState<boolean>(false);
     const toggleCampusModal = () => setCampusModal(!campusModal);
+    const [mapLayerModal, setMapLayerModal] = useState<boolean>(false);
+    const toggleMapLayerModal = () => setMapLayerModal(!mapLayerModal);
+    const [selectedMapLayer, setSelectedMapLayer] = useState<string>('satellite');
     const [currentSearchedSpecies, setCurrentSearchedSpecies] = useState<ICampusSpecies | null>(null);
 
     const date = new Date();
@@ -44,57 +47,7 @@ export default function Landing() {
     // const toggleShowModal = () => setShowModal(!showModal);
     const toggleShowPanel = () => setShowPanel(!showPanel);
     const [selectedCampusData, setSelectedCampusData] = useState<ICampus | null>(null);
-
-
-    const initCampus = () => {
-        if (campusId) {
-            setSelectedCampusId(campusId);
-        } else {
-            setSelectedCampusId(campuses[0]?.id);
-        }
-    }
-
-
-    const getCampuses = async () => {
-        const table = "campus";
-        try {
-            const response = await supabase
-                .from(table)
-                .select("*")
-                .order("campus", { ascending: true })
-                .is("deleted_at", null);
-
-            if (response.error) {
-                toast.error(response.error.message);
-                return;
-            }
-
-            const campusesData = response.data as ICampus[];
-            setCampuses(campusesData);
-
-            // Determine which campus to select and set its data
-            let targetCampusId: string | number;
-            if (campusId) {
-                targetCampusId = campusId;
-                setSelectedCampusId(campusId);
-            } else {
-                targetCampusId = campusesData[0]?.id?.toString() ?? "";
-                setSelectedCampusId(campusesData[0]?.id);
-            }
-
-            // Set the selected campus data for the transition screen
-            const campusData = campusesData.find(campus => campus.id?.toString() === targetCampusId?.toString());
-            if (campusData) {
-                setSelectedCampusData(campusData);
-            }
-
-            // Fetch species for the selected campus
-            fetchSpecies(targetCampusId);
-        } catch (error: unknown) {
-            toast.error((error as Error).message);
-            return null;
-        }
-    }
+    const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
     const getCampusSpecies = async (campusId: string | number | undefined) => {
         const table = "campus_species";
@@ -117,7 +70,68 @@ export default function Landing() {
         }
     }
 
-    const getAllCampusSpecies = async () => {
+    const fetchSpecies = useCallback(async (campusId: string) => {
+        const campusSpeciesData = await getCampusSpecies(campusId) ?? [];
+        setCampusSpecies(campusSpeciesData);
+        campusSpeciesData.map((specie) => {
+            if (specie.id) {
+                return { value: (specie?.id ?? '').toString(), text: specie.speciesData?.commonName ?? "" };
+            }
+            return undefined;
+        }).filter((item): item is { value: string; text: string } => item !== undefined);
+    }, []);
+
+    const getCampuses = useCallback(async () => {
+        const table = "campus";
+        try {
+            const response = await supabase
+                .from(table)
+                .select("*")
+                .order("campus", { ascending: true })
+                .is("deleted_at", null);
+
+            if (response.error) {
+                toast.error(response.error.message);
+                return;
+            }
+
+            const campusesData = response.data as ICampus[];
+            setCampuses(campusesData);
+
+            // Determine which campus to select and set its data
+            let targetCampusId: string | number;
+            let campusData: ICampus | undefined;
+
+            if (campusId) {
+                targetCampusId = campusId;
+                setSelectedCampusId(campusId);
+                campusData = campusesData.find(campus => campus.id?.toString() === targetCampusId?.toString());
+            } else {
+                // No campusId in URL - redirect to first campus with proper coordinates
+                const firstCampus = campusesData[0];
+                if (firstCampus && firstCampus.id) {
+                    window.location.href = `?campusId=${firstCampus.id}&coordinates=${firstCampus.latitude},${firstCampus.longitude}&zoom=${firstCampus.zoom || 40}`;
+                    return; // Exit early as we're redirecting
+                }
+                targetCampusId = campusesData[0]?.id?.toString() ?? "";
+                setSelectedCampusId(campusesData[0]?.id);
+                campusData = campusesData[0];
+            }
+
+            // Set the selected campus data for the transition screen
+            if (campusData) {
+                setSelectedCampusData(campusData);
+            }
+
+            // Fetch species for the selected campus
+            fetchSpecies(targetCampusId);
+        } catch (error: unknown) {
+            toast.error((error as Error).message);
+            return null;
+        }
+    }, [campusId, fetchSpecies]);
+
+    const getAllCampusSpecies = useCallback(async () => {
         const table = "campus_species";
         try {
             const response = await supabase
@@ -135,18 +149,7 @@ export default function Landing() {
             toast.error((error as Error).message);
             return null;
         }
-    }
-
-    const fetchSpecies = async (campusId: string) => {
-        const campusSpeciesData = await getCampusSpecies(campusId) ?? [];
-        setCampusSpecies(campusSpeciesData);
-        campusSpeciesData.map((specie) => {
-            if (specie.id) {
-                return { value: (specie?.id ?? '').toString(), text: specie.speciesData?.commonName ?? "" };
-            }
-            return undefined;
-        }).filter((item): item is { value: string; text: string } => item !== undefined);
-    }
+    }, []);
 
 
     const handleModal = (data: ICampusSpecies) => {
@@ -162,32 +165,17 @@ export default function Landing() {
         }
     }
 
+    const handleChangeMapLayer = (layer: string) => {
+        setSelectedMapLayer(layer);
+        toggleMapLayerModal();
+    };
+
     const handleSearchChange = (value: string) => {
         setSearchQuery(value);
     }
 
     const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && searchQuery.trim()) {
-            const query = searchQuery.toLowerCase();
-            const foundSpecie = allCampusSpecies.find((specie) => {
-                const commonName = specie.speciesData?.commonName?.toLowerCase() || '';
-                const scientificName = specie.speciesData?.scientificName?.toLowerCase() || '';
-                const category = specie.speciesData?.category?.toLowerCase() || '';
-                return commonName.includes(query) || scientificName.includes(query) || category.includes(query);
-            });
-            if (foundSpecie) {
-                const category = foundSpecie.speciesData?.category?.toLowerCase();
-                window.location.href = `?campusId=${foundSpecie.campus}&coordinates=${foundSpecie.longitude},${foundSpecie.latitude}&category=${category}&zoom=20`;
-                setSearchQuery("");
-                toggleSearchModal();
-            } else {
-                toast.info(`No species found matching "${searchQuery}"`);
-            }
-        }
-    }
-
-    const handleSearchSubmit = () => {
-        if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
             const foundSpecie = allCampusSpecies.find((specie) => {
                 const commonName = specie.speciesData?.commonName?.toLowerCase() || '';
@@ -223,24 +211,27 @@ export default function Landing() {
         setCurrentSearchedSpecies(null);
     };
 
-    const getData = async () => {
-        setIsShowMap(false);
-        setSelectedCampusData(null); // Reset campus data before fetching new one
-        await getCampuses();
-        await getAllCampusSpecies(); // Fetch all species for cross-campus search
-        setTimeout(() => {
-            setIsShowMap(true);
-        }, 3000);
-    }
-
-
     useEffect(() => {
-        initCampus();
-        getData();
+        if (!isInitialized) {
+            setIsShowMap(false);
+            setSelectedCampusData(null);
+
+            const loadData = async () => {
+                await getCampuses();
+                await getAllCampusSpecies();
+                setIsInitialized(true);
+                setTimeout(() => {
+                    setIsShowMap(true);
+                }, 3000);
+            };
+
+            loadData();
+        }
+
         return () => {
             setIsShowMap(false);
         }
-    }, [campusId]);
+    }, [isInitialized, getCampuses, getAllCampusSpecies]);
 
     useEffect(() => {
         // Find the searched species based on coordinates in URL
@@ -268,9 +259,20 @@ export default function Landing() {
             }
             {
                 searchModal && (
-                    <Modal title="Search Species" isOpen={searchModal} onClose={toggleSearchModal} modalContainerClassName="max-w-2xl" titleClass="text-xl font-medium text-gray-900 ml-5">
+                    <Modal
+                        title={
+                            <div className="flex items-center gap-2">
+                                <FaSearch size={20} className="text-red-500" />
+                                <span>Search Species</span>
+                            </div>
+                        }
+                        isOpen={searchModal}
+                        onClose={toggleSearchModal}
+                        modalContainerClassName="max-w-2xl"
+                        titleClass="text-xl font-medium text-gray-900 ml-5"
+                    >
                         <div className="p-4 sm:p-6">
-                            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                            <div className="mb-4">
                                 <input
                                     type="text"
                                     value={searchQuery}
@@ -280,12 +282,6 @@ export default function Landing() {
                                     className="input input-bordered w-full text-sm sm:text-base"
                                     autoFocus
                                 />
-                                <button
-                                    onClick={handleSearchSubmit}
-                                    className="btn bg-green-600 hover:bg-green-700 text-white border-none px-6 sm:px-8"
-                                >
-                                    Search
-                                </button>
                             </div>
                             <div className="divider my-2">Results</div>
                             <div className="max-h-[50vh] overflow-y-auto">
@@ -353,17 +349,16 @@ export default function Landing() {
                                     <button
                                         key={index}
                                         onClick={() => handleChangeCampus(campus.id?.toString() ?? "")}
-                                        className={`p-4 sm:p-5 text-left border-2 rounded-lg transition-all hover:border-green-600 hover:bg-green-50 ${
-                                            campus.id?.toString() === selectedCampusId?.toString()
-                                                ? 'border-green-600 bg-green-50'
-                                                : 'border-gray-200'
-                                        }`}
+                                        className={`p-4 sm:p-5 text-left border-2 rounded-lg transition-all hover:border-green-600 hover:bg-green-50 ${campus.id?.toString() === selectedCampusId?.toString()
+                                            ? 'border-green-600 bg-green-50'
+                                            : 'border-gray-200'
+                                            }`}
                                     >
                                         <div className="flex items-start gap-3">
-                                            <BiMapPin 
-                                                size={24} 
+                                            <BiMapPin
+                                                size={24}
                                                 className="mt-1 flex-shrink-0"
-                                                color={campus.id?.toString() === selectedCampusId?.toString() ? '#16a34a' : '#9ca3af'} 
+                                                color={campus.id?.toString() === selectedCampusId?.toString() ? '#16a34a' : '#9ca3af'}
                                             />
                                             <div className="flex-1">
                                                 <div className="font-semibold text-base sm:text-lg text-gray-800">
@@ -374,6 +369,61 @@ export default function Landing() {
                                                         {campus.address}
                                                     </div>
                                                 )}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </Modal>
+                )
+            }
+            {
+                mapLayerModal && (
+                    <Modal
+                        title={
+                            <div className="flex items-center gap-2">
+                                <FaLayerGroup size={20} className="text-green-600" />
+                                <span>Select Map Layer</span>
+                            </div>
+                        }
+                        isOpen={mapLayerModal}
+                        onClose={toggleMapLayerModal}
+                        modalContainerClassName="max-w-lg"
+                        titleClass="text-xl font-medium text-gray-900 ml-5"
+                    >
+                        <div className="p-4 sm:p-6">
+                            <div className="grid grid-cols-1 gap-2 sm:gap-3">
+                                {[
+                                    { id: 'outdoor', name: 'Outdoor', description: 'Detailed outdoor map with terrain features' },
+                                    { id: 'satellite', name: 'Satellite', description: 'Satellite imagery with labels' },
+                                    { id: 'base', name: 'Base', description: 'Simple base map with minimal details' },
+                                    { id: 'streets', name: 'Streets', description: 'Street map with roads and labels' },
+                                    { id: 'landscape', name: 'Landscape', description: 'Natural landscape features and terrain' },
+                                    { id: 'topo', name: 'Topo', description: 'Topographic map with contour lines' },
+                                    { id: 'dataviz', name: 'Dataviz', description: 'High contrast map optimized for data visualization' }
+                                ].map((layer) => (
+                                    <button
+                                        key={layer.id}
+                                        onClick={() => handleChangeMapLayer(layer.id)}
+                                        className={`p-4 sm:p-5 text-left border-2 rounded-lg transition-all hover:border-green-600 hover:bg-green-50 ${layer.id === selectedMapLayer
+                                            ? 'border-green-600 bg-green-50'
+                                            : 'border-gray-200'
+                                            }`}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <FaLayerGroup
+                                                size={24}
+                                                className="mt-1 flex-shrink-0"
+                                                color={layer.id === selectedMapLayer ? '#16a34a' : '#9ca3af'}
+                                            />
+                                            <div className="flex-1">
+                                                <div className="font-semibold text-base sm:text-lg text-gray-800">
+                                                    {layer.name}
+                                                </div>
+                                                <div className="text-xs sm:text-sm text-gray-500 mt-1">
+                                                    {layer.description}
+                                                </div>
                                             </div>
                                         </div>
                                     </button>
@@ -463,7 +513,7 @@ export default function Landing() {
                                             <button className="btn btn-ghost btn-xs sm:btn-sm p-1 sm:p-2 min-h-0 h-8 sm:h-10" onClick={toggleShowPanel}>
                                                 <IoMenu size={24} className="sm:w-[30px] sm:h-[30px]" color="white" />
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={toggleSearchModal}
                                                 className="btn btn-xs sm:btn-sm md:btn-md h-8 sm:h-10 md:h-12 px-3 sm:px-4 md:px-6 gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
                                             >
@@ -496,7 +546,14 @@ export default function Landing() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="flex flex-row">
+                                    <div className="flex flex-row gap-2">
+                                        <button
+                                            onClick={toggleMapLayerModal}
+                                            className="btn btn-xs sm:btn-sm md:btn-md h-8 sm:h-10 md:h-12 px-3 sm:px-4 md:px-6 gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
+                                        >
+                                            <FaLayerGroup size={14} className="sm:w-4 sm:h-4" color="green" />
+                                            <span className="text-xs sm:text-sm md:text-base hidden lg:inline">Map</span>
+                                        </button>
                                         <button
                                             onClick={toggleCampusModal}
                                             className="btn btn-xs sm:btn-sm md:btn-md h-8 sm:h-10 md:h-12 px-3 sm:px-4 md:px-6 gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
@@ -517,6 +574,7 @@ export default function Landing() {
                                     campuses={campuses}
                                     campusSpecies={campusSpecies}
                                     handleModal={handleModal}
+                                    selectedMapLayer={selectedMapLayer}
                                 />
                             </main>
 

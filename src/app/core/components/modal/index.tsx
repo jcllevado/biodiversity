@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef } from "react";
 
 type Props = {
-    title?: string;
+    title?: string | React.ReactNode;
     titleClass?: string;
     children: React.ReactNode;
     isOpen: boolean;
