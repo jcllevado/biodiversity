@@ -5,10 +5,18 @@ import { MapContainer, Marker, TileLayer, useMap, ZoomControl, Tooltip } from "r
 import osmMaptiler from '../../constants/osm-maptiler';
 import mapPin from '../../../../assets/pin2.png'
 import schoolPin from '../../../../assets/schoolmap-pin.png'
-import activePin from '../../../../assets/animated-map-pin.gif'
+import birdIcon from '../../../../assets/svgs/bird.svg'
+import batIcon from '../../../../assets/svgs/bat.svg'
+import treeIcon from '../../../../assets/svgs/tree.svg'
+import mangroveIcon from '../../../../assets/svgs/mangrove.svg'
+import butterflyIcon from '../../../../assets/svgs/butterfly.svg'
+import dragonflyIcon from '../../../../assets/svgs/dragonfly.svg'
+import damselflyIcon from '../../../../assets/svgs/damselfly.svg'
+import frogIcon from '../../../../assets/svgs/frog.svg'
 import { ICampus, ICampusSpecies } from '../../interfaces/common.interface';
 import { useSearchParams } from 'react-router-dom';
 import fallbackImage from "../../../../assets/fallback-image.jpg";
+import { SpeciesCategory } from '../../enums/species';
 
 type MapComponentProps = {
     campuses: ICampus[];
@@ -16,25 +24,6 @@ type MapComponentProps = {
     handleModal: (data: ICampusSpecies) => void;
 };
 
-// Define a custom icon
-const customIcon = L.icon({
-    iconUrl: mapPin, // URL to your custom icon
-    iconSize: [30, 30], // Size of the icon [width, height]
-    iconAnchor: [19, 38], // Anchor point of the icon [x, y]
-    popupAnchor: [0, -38], // Anchor for the popup [x, y]
-    shadowSize: [68, 95], // Size of the shadow
-    shadowAnchor: [22, 94] // Anchor point for the shadow
-});
-
-// Define a custom icon
-const customIconActive = L.icon({
-    iconUrl: activePin, // URL to your custom icon
-    iconSize: [60, 60], // Size of the icon [width, height]
-    iconAnchor: [19, 38], // Anchor point of the icon [x, y]
-    popupAnchor: [0, -38], // Anchor for the popup [x, y]
-    shadowSize: [68, 95], // Size of the shadow
-    shadowAnchor: [22, 94] // Anchor point for the shadow
-});
 
 // Define a custom icon
 const schoolIcon = L.icon({
@@ -46,29 +35,135 @@ const schoolIcon = L.icon({
     shadowAnchor: [22, 94] // Anchor point for the shadow
 });
 
+// Map category icons
+const categoryIconMap: Record<string, string> = {
+    [SpeciesCategory.BIRDS]: birdIcon,
+    [SpeciesCategory.BATS]: batIcon,
+    [SpeciesCategory.TREES]: treeIcon,
+    [SpeciesCategory.MANGROVES]: mangroveIcon,
+    [SpeciesCategory.BUTTERFLY]: butterflyIcon,
+    [SpeciesCategory.DRAGONFLY]: dragonflyIcon,
+    [SpeciesCategory.DAMSELFLY]: damselflyIcon,
+    [SpeciesCategory.FROGS]: frogIcon,
+};
+
+// Get SVG icon for filter button
+const getFilterIcon = (category: string) => {
+    return categoryIconMap[category] || mapPin;
+};
+
+// Function to create icon based on category
+const createCategoryIcon = (category: string | undefined, isHighlighted: boolean = false) => {
+    const iconUrl = category ? categoryIconMap[category.toLowerCase()] || mapPin : mapPin;
+    return L.icon({
+        iconUrl: iconUrl,
+        iconSize: isHighlighted ? [50, 50] : [35, 35],
+        iconAnchor: isHighlighted ? [25, 50] : [17, 35],
+        popupAnchor: [0, isHighlighted ? -50 : -35],
+        className: isHighlighted ? 'highlighted-marker' : '',
+    });
+};
+
 const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleModal }) => {
 
     const [searchParams] = useSearchParams();
     const campusId = searchParams.get('campusId');
     const coordinatesParams = searchParams.get('coordinates');
+    const categoryParam = searchParams.get('category');
     const zoomLevel = Number(searchParams.get('zoom')) != 0 ? Number(searchParams.get('zoom')) : 40;
-    const [coordinates, setCoordinates] = useState<LatLngExpression>([0, 0]);
+    const [coordinates, setCoordinates] = useState<LatLngExpression>(() => {
+        // Initialize with proper coordinates from URL or first campus
+        if (coordinatesParams) {
+            const coords = coordinatesParams.split(',').map((coordinate) => Number(coordinate));
+            return [coords[1], coords[0]];
+        }
+        return [0, 0];
+    });
     const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+    const [selectedFilters, setSelectedFilters] = useState<string[]>(() => {
+        // Initialize filter based on category from URL or default to birds
+        return categoryParam ? [categoryParam] : [SpeciesCategory.BIRDS];
+    });
+    const [highlightedSpecies, setHighlightedSpecies] = useState<string | null>(null);
+    const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 640);
+
+    // Adjust zoom level for mobile
+    const getResponsiveZoom = () => {
+        if (isMobile) {
+            // Set default zoom to 30 on mobile, or use provided zoom level
+            const defaultMobileZoom = 30;
+            // If zoom is the default 40, use mobile default of 30
+            // Otherwise use the provided zoom (e.g., from search which is 20)
+            return zoomLevel === 40 ? defaultMobileZoom : zoomLevel;
+        }
+        return zoomLevel ?? 40;
+    };
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const toggleFilter = (category: string) => {
+        setSelectedFilters(prev =>
+            prev.includes(category)
+                ? prev.filter(c => c !== category)
+                : [...prev, category]
+        );
+    };
+
+    const toggleAllFilters = () => {
+        if (selectedFilters.length === Object.values(SpeciesCategory).length) {
+            setSelectedFilters([]);
+        } else {
+            setSelectedFilters(Object.values(SpeciesCategory));
+        }
+    };
+
+    const filteredCampusSpecies = campusSpecies.filter(species =>
+        selectedFilters.includes(species.speciesData?.category?.toLowerCase() || '')
+    );
 
     useEffect(() => {
         if (campusId && coordinatesParams) {
-            const coordinates = coordinatesParams.split(',').map((coordinate) => Number(coordinate));
-            setCoordinates([coordinates[1], coordinates[0]]);
-        } else {
+            const coords = coordinatesParams.split(',').map((coordinate) => Number(coordinate));
+            setCoordinates([coords[1], coords[0]]);
+            
+            // Update filter if category is provided
+            if (categoryParam) {
+                setSelectedFilters([categoryParam]);
+                
+                // Find and highlight the species at these coordinates
+                const targetSpecies = campusSpecies.find(
+                    species => species.latitude === coords[1].toString() && species.longitude === coords[0].toString()
+                );
+                if (targetSpecies && targetSpecies.id) {
+                    setHighlightedSpecies(targetSpecies.id.toString());
+                } else {
+                    setHighlightedSpecies(null);
+                }
+            } else {
+                // No category means no search is active, clear highlight
+                setHighlightedSpecies(null);
+            }
+        } else if (campuses.length > 0) {
             const campus = campuses[0];
-            setCoordinates([Number(campus.longitude), Number(campus.latitude)]);
+            setCoordinates([Number(campus.latitude), Number(campus.longitude)]);
+            setHighlightedSpecies(null);
         }
-    }, [campusId, coordinatesParams]);
+    }, [campusId, coordinatesParams, categoryParam, campuses, campusSpecies]);
 
 
     const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
-        map.setView(coordinates, zoomLevel ?? 40);
+        // Only update the view when coordinates actually change, preserve user's zoom level
+        useEffect(() => {
+            map.setView(coordinates, getResponsiveZoom());
+        }, [coordinates]);
         return null;
     }
 
@@ -78,20 +173,52 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
 
     return (
         <Fragment>
-            <div className="w-full h-screen">
-                <MapContainer center={coordinates} zoom={zoomLevel ?? 40} scrollWheelZoom={true} zoomControl={false}>
+            <div className="w-full h-screen relative">
+                {/* Filter buttons */}
+                <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 sm:p-4 max-w-[220px] sm:max-w-none">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                        <button
+                            onClick={toggleAllFilters}
+                            className="text-sm sm:text-base px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 whitespace-nowrap w-full sm:w-auto font-medium"
+                        >
+                            {selectedFilters.length === Object.values(SpeciesCategory).length ? 'Clear' : 'All'}
+                        </button>
+                        {Object.values(SpeciesCategory).map((category) => (
+                            <button
+                                key={category}
+                                onClick={() => toggleFilter(category)}
+                                className={`px-3 sm:px-4 py-2 rounded-full text-sm sm:text-base font-medium transition-colors whitespace-nowrap w-full sm:w-auto flex items-center justify-center gap-2 ${selectedFilters.includes(category)
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                            >
+                                <img 
+                                    src={getFilterIcon(category)} 
+                                    alt={category}
+                                    className="w-5 h-5 sm:w-6 sm:h-6"
+                                />
+                                <span className="hidden sm:inline">{category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                            </button>
+                        ))}
+                        <span className="text-sm sm:text-base text-gray-600 whitespace-nowrap w-full sm:w-auto text-center sm:text-left sm:ml-1 font-medium">
+                            ({filteredCampusSpecies.length}/{campusSpecies.length})
+                        </span>
+                    </div>
+                </div>
+
+                <MapContainer center={coordinates} zoom={getResponsiveZoom()} scrollWheelZoom={true} zoomControl={false}>
                     <TileLayer
                         url={osmMaptiler.maptiler.url}
                         attribution={osmMaptiler.maptiler.attribution}
                     />
                     {
-                        campusSpecies.map((data, index) => {
-                            const currentCoordinates = [Number(data.latitude), Number(data.longitude)];
-                            const isActiveMark = JSON.stringify(coordinates) === JSON.stringify(currentCoordinates);
+                        filteredCampusSpecies.map((data, index) => {
+                            const isHighlighted = highlightedSpecies === data.id?.toString();
+                            const categoryIcon = createCategoryIcon(data.speciesData?.category, isHighlighted);
                             return <Marker
                                 key={index}
                                 position={[Number(data.latitude), Number(data.longitude)]}
-                                icon={isActiveMark ? customIconActive : customIcon}
+                                icon={categoryIcon}
                                 eventHandlers={{
                                     click: () => handleMarkerClick(data)
                                 }}

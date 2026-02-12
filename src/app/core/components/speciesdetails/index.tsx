@@ -65,12 +65,12 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
             </div>
         </ImageModal>
         }
-        <div className="flex flex-col">
-            <div className="grid grid-cols-4 gap-4">
-                <div className="p-3 flex flex-col">
+        <div className="flex flex-col p-2 sm:p-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="p-2 sm:p-3 flex flex-col">
                     {!imageLoaded && <div className="w-full bg-gray-200 animate-pulse">
-                        <div className="flex justify-center items-center min-h-52">
-                            <span className="text-gray-400">Loading...</span>
+                        <div className="flex justify-center items-center min-h-32 sm:min-h-52">
+                            <span className="text-gray-400 text-sm">Loading...</span>
                         </div>
                     </div>
                     }
@@ -96,39 +96,39 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
                             />
                         </div>
                     }
-                    <div className="flex flex-col justify-start mt-2 gap-y-1 border-[1px] rounded-md p-2">
-                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-2">
-                            <span className="font-semibold">Kingdom: </span>
-                            <h5 className="text-md">{specie?.kingdom}</h5>
+                    <div className="flex flex-col justify-start mt-2 gap-y-1 border-[1px] rounded-md p-1.5 sm:p-2">
+                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-1 sm:pb-2">
+                            <span className="font-semibold text-xs sm:text-sm">Kingdom: </span>
+                            <h5 className="text-xs sm:text-md">{specie?.kingdom}</h5>
                         </div>
-                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-2">
-                            <span className="font-semibold">Phylum: </span>
-                            <h5 className="text-md">{specie?.phylum}</h5>
+                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-1 sm:pb-2">
+                            <span className="font-semibold text-xs sm:text-sm">Phylum: </span>
+                            <h5 className="text-xs sm:text-md">{specie?.phylum}</h5>
                         </div>
-                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-2">
-                            <span className="font-semibold">Class: </span>
-                            <h5 className="text-md">{specie?.class}</h5>
+                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-1 sm:pb-2">
+                            <span className="font-semibold text-xs sm:text-sm">Class: </span>
+                            <h5 className="text-xs sm:text-md">{specie?.class}</h5>
                         </div>
-                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-2">
-                            <span className="font-semibold">Order: </span>
-                            <h5 className="text-md">{specie?.order}</h5>
+                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-1 sm:pb-2">
+                            <span className="font-semibold text-xs sm:text-sm">Order: </span>
+                            <h5 className="text-xs sm:text-md">{specie?.order}</h5>
                         </div>
-                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-2">
-                            <span className="font-semibold">Family: </span>
-                            <h5 className="text-md">{specie?.family}</h5>
+                        <div className="flex flex-row gap-x-2 border-b-[1px] pb-1 sm:pb-2">
+                            <span className="font-semibold text-xs sm:text-sm">Family: </span>
+                            <h5 className="text-xs sm:text-md">{specie?.family}</h5>
                         </div>
-                        <div className="flex flex-row gap-x-2 pb-2">
-                            <span className="font-semibold">Genus: </span>
-                            <h5 className="text-md">{specie?.genus}</h5>
+                        <div className="flex flex-row gap-x-2 pb-1 sm:pb-2">
+                            <span className="font-semibold text-xs sm:text-sm">Genus: </span>
+                            <h5 className="text-xs sm:text-md">{specie?.genus}</h5>
                         </div>
                     </div>
                 </div>
-                <div className="col-span-3">
+                <div className="lg:col-span-3">
                     <div className="flex flex-col">
-                        <span className='text-xs'>Scientific name</span>
-                        <h5 className="card-title italic text-lg">{specie?.scientificName}</h5>
+                        <span className='text-xs sm:text-sm'>Scientific name</span>
+                        <h5 className="card-title italic text-base sm:text-lg">{specie?.scientificName}</h5>
                     </div>
-                    <p className="card-text text-justify pl-2 mt-2 text-sm">{specie?.description}</p>
+                    <p className="card-text text-justify pl-1 sm:pl-2 mt-2 text-xs sm:text-sm">{specie?.description}</p>
                     <div className="flex flex-col flex-wrap gap-2">
                         {animalsList.includes(specie?.category?.toLowerCase() ?? "") &&
                             <AnimalsDetails specie={specie as ISpecies<TAnimalsDetails>} />
@@ -140,11 +140,15 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
                             <InsectsDetails specie={specie as ISpecies<TInsectDetails>} />
                         }
                     </div>
-                    <div className="divider"></div>
-                    <div className="flex flex-1 flex-col">
-                        <span className='text-lg font-semibold'>Captured Images</span>
-                        <SliderComponent items={images} />
-                    </div>
+                    {images.length > 0 && (
+                        <>
+                            <div className="divider my-2 sm:my-4"></div>
+                            <div className="flex flex-1 flex-col">
+                                <span className='text-base sm:text-lg font-semibold'>Captured Images</span>
+                                <SliderComponent items={images} />
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
