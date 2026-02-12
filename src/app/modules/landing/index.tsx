@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState, useCallback } from "react";
 import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import MapComponent from "../../core/components/map";
 import { FaExternalLinkAlt } from "react-icons/fa";
-import { IoMenu, IoClose } from "react-icons/io5";
+import { IoMenu, IoClose, IoHome } from "react-icons/io5";
 import { FaUserLock } from "react-icons/fa6";
 import { BiMapPin } from "react-icons/bi";
 import { FaSearch, FaLayerGroup } from "react-icons/fa";
@@ -48,6 +48,13 @@ export default function Landing() {
     const toggleShowPanel = () => setShowPanel(!showPanel);
     const [selectedCampusData, setSelectedCampusData] = useState<ICampus | null>(null);
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
+    // Redirect to home if no campusId is provided
+    useEffect(() => {
+        if (!campusId) {
+            navigate('/');
+        }
+    }, [campusId, navigate]);
 
     const getCampusSpecies = async (campusId: string | number | undefined) => {
         const table = "campus_species";
@@ -98,33 +105,20 @@ export default function Landing() {
             const campusesData = response.data as ICampus[];
             setCampuses(campusesData);
 
-            // Determine which campus to select and set its data
-            let targetCampusId: string | number;
-            let campusData: ICampus | undefined;
-
+            // Only process if campusId exists (already checked in useEffect, but double-check)
             if (campusId) {
-                targetCampusId = campusId;
+                const targetCampusId = campusId;
                 setSelectedCampusId(campusId);
-                campusData = campusesData.find(campus => campus.id?.toString() === targetCampusId?.toString());
-            } else {
-                // No campusId in URL - redirect to first campus with proper coordinates
-                const firstCampus = campusesData[0];
-                if (firstCampus && firstCampus.id) {
-                    window.location.href = `?campusId=${firstCampus.id}&coordinates=${firstCampus.latitude},${firstCampus.longitude}&zoom=${firstCampus.zoom || 40}`;
-                    return; // Exit early as we're redirecting
+                const campusData = campusesData.find(campus => campus.id?.toString() === targetCampusId?.toString());
+
+                // Set the selected campus data for the transition screen
+                if (campusData) {
+                    setSelectedCampusData(campusData);
                 }
-                targetCampusId = campusesData[0]?.id?.toString() ?? "";
-                setSelectedCampusId(campusesData[0]?.id);
-                campusData = campusesData[0];
-            }
 
-            // Set the selected campus data for the transition screen
-            if (campusData) {
-                setSelectedCampusData(campusData);
+                // Fetch species for the selected campus
+                fetchSpecies(targetCampusId);
             }
-
-            // Fetch species for the selected campus
-            fetchSpecies(targetCampusId);
         } catch (error: unknown) {
             toast.error((error as Error).message);
             return null;
@@ -160,9 +154,13 @@ export default function Landing() {
     const handleChangeCampus = (value: string) => {
         const campusData = campuses.find(campus => campus.id?.toString() === value.toString());
         if (campusData) {
-            window.location.href = `?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}&zoom=${campusData.zoom}`;
+            window.location.href = `/map?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}&zoom=${campusData.zoom}`;
             toggleCampusModal();
         }
+    }
+
+    const handleBackToHome = () => {
+        navigate('/');
     }
 
     const handleChangeMapLayer = (layer: string) => {
@@ -185,7 +183,7 @@ export default function Landing() {
             });
             if (foundSpecie) {
                 const category = foundSpecie.speciesData?.category?.toLowerCase();
-                window.location.href = `?campusId=${foundSpecie.campus}&coordinates=${foundSpecie.longitude},${foundSpecie.latitude}&category=${category}&zoom=20`;
+                window.location.href = `/map?campusId=${foundSpecie.campus}&coordinates=${foundSpecie.longitude},${foundSpecie.latitude}&category=${category}&zoom=20`;
                 setSearchQuery("");
                 toggleSearchModal();
             } else {
@@ -206,7 +204,7 @@ export default function Landing() {
         const campus = campuses.find(c => c.id?.toString() === selectedCampusId?.toString());
         if (campus) {
             // Navigate back to campus view with campus's default zoom level without reload
-            navigate(`?campusId=${campus.id}&coordinates=${campus.latitude},${campus.longitude}&zoom=${campus.zoom || 15}`, { replace: true });
+            navigate(`/map?campusId=${campus.id}&coordinates=${campus.latitude},${campus.longitude}&zoom=${campus.zoom || 15}`, { replace: true });
         }
         setCurrentSearchedSpecies(null);
     };
@@ -294,7 +292,7 @@ export default function Landing() {
                                                     key={index}
                                                     onClick={() => {
                                                         const category = specie.speciesData?.category?.toLowerCase();
-                                                        window.location.href = `?campusId=${specie.campus}&coordinates=${specie.longitude},${specie.latitude}&category=${category}&zoom=20`;
+                                                        window.location.href = `/map?campusId=${specie.campus}&coordinates=${specie.longitude},${specie.latitude}&category=${category}&zoom=20`;
                                                         setSearchQuery("");
                                                         toggleSearchModal();
                                                     }}
@@ -514,11 +512,19 @@ export default function Landing() {
                                                 <IoMenu size={24} className="sm:w-[30px] sm:h-[30px]" color="white" />
                                             </button>
                                             <button
+                                                onClick={handleBackToHome}
+                                                className="btn btn-xs sm:btn-sm h-8 sm:h-10 px-2 sm:px-3 gap-1 sm:gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
+                                                title="Back to Home"
+                                            >
+                                                <IoHome size={16} className="sm:w-5 sm:h-5" color="green" />
+                                                <span className="text-xs sm:text-sm hidden sm:inline">Home</span>
+                                            </button>
+                                            <button
                                                 onClick={toggleSearchModal}
-                                                className="btn btn-xs sm:btn-sm md:btn-md h-8 sm:h-10 md:h-12 px-3 sm:px-4 md:px-6 gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
+                                                className="btn btn-xs sm:btn-sm h-8 sm:h-10 px-2 sm:px-3 gap-1 sm:gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
                                             >
                                                 <FaSearch size={14} className="sm:w-4 sm:h-4" color="red" />
-                                                <span className="text-xs sm:text-sm md:text-base">Search</span>
+                                                <span className="text-xs sm:text-sm">Search</span>
                                             </button>
                                         </div>
                                         {currentSearchedSpecies && (
@@ -548,21 +554,20 @@ export default function Landing() {
                                     </div>
                                     <div className="flex flex-row gap-2">
                                         <button
-                                            onClick={toggleMapLayerModal}
-                                            className="btn btn-xs sm:btn-sm md:btn-md h-8 sm:h-10 md:h-12 px-3 sm:px-4 md:px-6 gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
-                                        >
-                                            <FaLayerGroup size={14} className="sm:w-4 sm:h-4" color="green" />
-                                            <span className="text-xs sm:text-sm md:text-base hidden lg:inline">Map</span>
-                                        </button>
-                                        <button
                                             onClick={toggleCampusModal}
-                                            className="btn btn-xs sm:btn-sm md:btn-md h-8 sm:h-10 md:h-12 px-3 sm:px-4 md:px-6 gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
+                                            className="btn btn-xs sm:btn-sm h-8 sm:h-10 px-2 sm:px-3 gap-1 sm:gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
                                         >
                                             <BiMapPin size={16} className="sm:w-5 sm:h-5" color="red" />
-                                            <span className="text-xs sm:text-sm md:text-base hidden md:inline">Campus</span>
-                                            <span className="text-xs sm:text-sm md:text-base font-semibold">
+                                            <span className="text-xs sm:text-sm font-semibold">
                                                 {campuses.find(c => c.id?.toString() === selectedCampusId?.toString())?.campus || 'Select'}
                                             </span>
+                                        </button>
+                                        <button
+                                            onClick={toggleMapLayerModal}
+                                            className="btn btn-xs sm:btn-sm h-8 sm:h-10 px-2 sm:px-3 gap-1 sm:gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
+                                        >
+                                            <FaLayerGroup size={14} className="sm:w-4 sm:h-4" color="green" />
+                                            <span className="text-xs sm:text-sm hidden lg:inline">Map</span>
                                         </button>
                                     </div>
 
@@ -575,6 +580,10 @@ export default function Landing() {
                                     campusSpecies={campusSpecies}
                                     handleModal={handleModal}
                                     selectedMapLayer={selectedMapLayer}
+                                    campusId={campusId}
+                                    coordinatesParams={coordinatesParams}
+                                    categoryParam={searchParams.get('category')}
+                                    zoomLevel={Number(searchParams.get('zoom')) !== 0 ? Number(searchParams.get('zoom')) : 40}
                                 />
                             </main>
 

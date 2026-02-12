@@ -2,7 +2,7 @@ import 'leaflet/dist/leaflet.css';
 import { FC, Fragment, useEffect, useState } from 'react';
 import L, { LatLngExpression } from "leaflet";
 import { MapContainer, Marker, TileLayer, useMap, ZoomControl, Tooltip } from "react-leaflet";
-import  { mapLayers } from '../../constants/osm-maptiler';
+import { mapLayers } from '../../constants/osm-maptiler';
 import mapPin from '../../../../assets/pin2.png'
 import schoolPin from '../../../../assets/schoolmap-pin.png'
 import birdIcon from '../../../../assets/svgs/bird.svg'
@@ -14,7 +14,6 @@ import dragonflyIcon from '../../../../assets/svgs/dragonfly.svg'
 import damselflyIcon from '../../../../assets/svgs/damselfly.svg'
 import frogIcon from '../../../../assets/svgs/frog.svg'
 import { ICampus, ICampusSpecies } from '../../interfaces/common.interface';
-import { useSearchParams } from 'react-router-dom';
 import fallbackImage from "../../../../assets/fallback-image.jpg";
 import { SpeciesCategory } from '../../enums/species';
 
@@ -23,6 +22,10 @@ type MapComponentProps = {
     campusSpecies: ICampusSpecies[];
     handleModal: (data: ICampusSpecies) => void;
     selectedMapLayer?: string;
+    campusId?: string | null;
+    coordinatesParams?: string | null;
+    categoryParam?: string | null;
+    zoomLevel?: number;
 };
 
 
@@ -30,10 +33,8 @@ type MapComponentProps = {
 const schoolIcon = L.icon({
     iconUrl: schoolPin, // URL to your custom icon
     iconSize: [50, 50], // Size of the icon [width, height]
-    iconAnchor: [19, 38], // Anchor point of the icon [x, y]
-    popupAnchor: [0, -38], // Anchor for the popup [x, y]
-    shadowSize: [68, 95], // Size of the shadow
-    shadowAnchor: [22, 94] // Anchor point for the shadow
+    iconAnchor: [25, 50], // Anchor point of the icon [x, y] - centered bottom
+    popupAnchor: [0, -50], // Anchor for the popup [x, y]
 });
 
 // Map category icons
@@ -65,13 +66,17 @@ const createCategoryIcon = (category: string | undefined, isHighlighted: boolean
     });
 };
 
-const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleModal, selectedMapLayer = 'satellite' }) => {
+const MapComponent: FC<MapComponentProps> = ({
+    campuses,
+    campusSpecies,
+    handleModal,
+    selectedMapLayer = 'satellite',
+    campusId,
+    coordinatesParams,
+    categoryParam,
+    zoomLevel = 40
+}) => {
 
-    const [searchParams] = useSearchParams();
-    const campusId = searchParams.get('campusId');
-    const coordinatesParams = searchParams.get('coordinates');
-    const categoryParam = searchParams.get('category');
-    const zoomLevel = Number(searchParams.get('zoom')) != 0 ? Number(searchParams.get('zoom')) : 40;
     const [coordinates, setCoordinates] = useState<LatLngExpression>(() => {
         // Initialize with proper coordinates from URL or first campus
         if (coordinatesParams) {
@@ -133,11 +138,11 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
         if (campusId && coordinatesParams) {
             const coords = coordinatesParams.split(',').map((coordinate) => Number(coordinate));
             setCoordinates([coords[1], coords[0]]);
-            
+
             // Update filter if category is provided
             if (categoryParam) {
                 setSelectedFilters([categoryParam]);
-                
+
                 // Find and highlight the species at these coordinates
                 const targetSpecies = campusSpecies.find(
                     species => species.latitude === coords[1].toString() && species.longitude === coords[0].toString()
@@ -193,8 +198,8 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                             >
-                                <img 
-                                    src={getFilterIcon(category)} 
+                                <img
+                                    src={getFilterIcon(category)}
                                     alt={category}
                                     className="w-5 h-5 sm:w-6 sm:h-6"
                                 />

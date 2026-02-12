@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import Home from "../modules/home";
 import Landing from "../modules/landing";
 import Admin from "../modules/admin";
 import Notfound from "../modules/notfound";
@@ -6,6 +7,10 @@ import Notfound from "../modules/notfound";
 export const router = createBrowserRouter([
     {
         path: "/",
+        element: <Home />
+    },
+    {
+        path: "/map",
         element: <Landing />
     },
     {
