@@ -480,12 +480,27 @@ export default function Landing() {
                             <div className="z-20 absolute w-full flex flex-row justify-start">
                                 {showPanel && (
                                     <aside className="flex flex-col bg-white h-screen w-full sm:w-80 flex-start items-start border-l-2">
-                                        <div className="p-2 flex flex-col h-full justify-start items-center gap-2">
+                                        <div className="p-2 flex flex-col h-full justify-start items-center gap-2 overflow-y-auto">
                                             <img src={USTPLogo} alt="USTP Logo" className="w-20 h-20 mt-20" />
                                             <p className="p-2 text-sm text-center">University of Science and Technology of Southern Philippines</p>
-                                            <p className="text-justify p-2 text-sm">
-                                                The USTP Biodiversity web application showcases a rich collection of specimens and exhibits dedicated to the study and conservation of biodiversity. It features detailed descriptions of various species, interactive exhibits, and educational resources that highlight the importance of preserving our natural heritage.
-                                            </p>
+                                            <div className="text-justify p-2 text-sm space-y-3">
+                                                <p>
+                                                    USTP Biodiversity App is a comprehensive digital initiative designed to document, monitor, and celebrate the rich biological diversity found across the University of Science and Technology of Southern Philippines campuses.
+                                                </p>
+                                                <p>
+                                                    This serves as an interactive repository showcasing various species of flora and fauna that inhabit our university grounds. From native trees and vibrant butterflies to diverse bird species and unique insects, each entry provides valuable insights into the ecological wealth of our region.
+                                                </p>
+                                                <p>This initiative aims to:</p>
+                                                <ul className="list-disc pl-5 space-y-1">
+                                                    <li>Promote environmental awareness and conservation among students and faculty</li>
+                                                    <li>Provide educational resources for research and learning</li>
+                                                    <li>Document and preserve knowledge about local biodiversity</li>
+                                                    <li>Foster appreciation for our natural heritage</li>
+                                                </ul>
+                                                <p>
+                                                    Explore the interactive maps below to discover the biodiversity of each USTP campus.
+                                                </p>
+                                            </div>
                                         </div>
                                         <div className="w-full text-center mb-2 text-xs">
                                             Copyright &copy; {date.getFullYear()} USTP Biodiversity Project
