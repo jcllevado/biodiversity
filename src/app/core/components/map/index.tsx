@@ -181,11 +181,11 @@ const MapComponent: FC<MapComponentProps> = ({
         <Fragment>
             <div className="w-full h-screen relative">
                 {/* Filter buttons */}
-                <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 sm:p-4 max-w-[220px] sm:max-w-none">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-[1000] bg-white rounded-lg shadow-lg p-2 sm:p-2.5 max-w-[200px] sm:max-w-none">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2">
                         <button
                             onClick={toggleAllFilters}
-                            className="text-sm sm:text-base px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 whitespace-nowrap w-full sm:w-auto font-medium"
+                            className="text-xs sm:text-sm px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 whitespace-nowrap w-full sm:w-auto font-medium"
                         >
                             {selectedFilters.length === Object.values(SpeciesCategory).length ? 'Clear' : 'All'}
                         </button>
@@ -193,7 +193,7 @@ const MapComponent: FC<MapComponentProps> = ({
                             <button
                                 key={category}
                                 onClick={() => toggleFilter(category)}
-                                className={`px-3 sm:px-4 py-2 rounded-full text-sm sm:text-base font-medium transition-colors whitespace-nowrap w-full sm:w-auto flex items-center justify-center gap-2 ${selectedFilters.includes(category)
+                                className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap w-full sm:w-auto flex items-center justify-center gap-1.5 ${selectedFilters.includes(category)
                                     ? 'bg-green-600 text-white'
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
@@ -201,12 +201,12 @@ const MapComponent: FC<MapComponentProps> = ({
                                 <img
                                     src={getFilterIcon(category)}
                                     alt={category}
-                                    className="w-5 h-5 sm:w-6 sm:h-6"
+                                    className="hidden sm:inline w-4 h-4 sm:w-5 sm:h-5"
                                 />
-                                <span className="hidden sm:inline">{category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                                <span>{category.charAt(0).toUpperCase() + category.slice(1)}</span>
                             </button>
                         ))}
-                        <span className="text-sm sm:text-base text-gray-600 whitespace-nowrap w-full sm:w-auto text-center sm:text-left sm:ml-1 font-medium">
+                        <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap w-full sm:w-auto text-center sm:text-left sm:ml-1 font-medium">
                             ({filteredCampusSpecies.length}/{campusSpecies.length})
                         </span>
                     </div>
