@@ -38,6 +38,7 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
 
     const [images, setImages] = useState<IImages[]>([])
     const [imageLoaded, setImageLoaded] = React.useState<boolean>(false);
+    const [isUsingFallbackImage, setIsUsingFallbackImage] = React.useState<boolean>(!Boolean(specie?.gdriveid));
     const [selectedImage, setSelectedImage] = React.useState<string>('');
     const [imageModal, setImageModal] = React.useState<boolean>(false);
     const toggleImageModal = () => setImageModal(!imageModal);
@@ -50,6 +51,7 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
     const primaryImageSrc = specie?.gdriveid
         ? `https://drive.google.com/thumbnail?id=${specie.gdriveid}&sz=w1000`
         : getSpecieIconFallback();
+    const canOpenImageModal = Boolean(specie?.gdriveid) && !isUsingFallbackImage;
 
     const handleImageModal = (image: string) => {
         setSelectedImage(image);
@@ -82,6 +84,10 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
         getSpecieImages();
     }, [])
 
+    useEffect(() => {
+        setIsUsingFallbackImage(!Boolean(specie?.gdriveid));
+    }, [specie?.gdriveid]);
+
     return <Fragment>
         {imageModal && <ImageModal isOpen={imageModal} onClose={toggleImageModal}>
             <div className="flex flex-col items-center justify-center w-full h-full">
@@ -106,10 +112,13 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
                         src={primaryImageSrc}
                         alt={specie?.commonName ?? ''}
                         onLoad={() => setImageLoaded(true)}
-                        className={`hover:cursor-pointer hover:opacity-90 ${imageLoaded ? 'block' : 'hidden'}`}
-                        onError={e => e.currentTarget.src = getSpecieIconFallback()}
+                        className={`${canOpenImageModal ? 'hover:cursor-pointer hover:opacity-90' : ''} ${imageLoaded ? 'block' : 'hidden'}`}
+                        onError={e => {
+                            setIsUsingFallbackImage(true);
+                            e.currentTarget.src = getSpecieIconFallback();
+                        }}
                         onClick={() => {
-                            if (specie?.gdriveid) {
+                            if (canOpenImageModal) {
                                 handleImageModal(primaryImageSrc);
                             }
                         }}

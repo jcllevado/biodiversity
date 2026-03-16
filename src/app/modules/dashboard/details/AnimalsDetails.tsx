@@ -1,12 +1,15 @@
 import React, { Fragment } from 'react';
 import { ISpecies } from '../../../core/interfaces/common.interface';
 import { TAnimalsDetails } from '../../../core/types/common.types';
+import { getDietIcons } from '../../../core/helpers/diet';
 
 interface Props {
     specie?: ISpecies<TAnimalsDetails>;
 }
 
 const AnimalsDetails: React.FC<Props> = ({ specie }) => {
+
+    const dietIcons = getDietIcons(specie?.details?.diet);
 
     return <Fragment>
         <div className="flex flex-col flex-wrap gap-2">
@@ -21,7 +24,19 @@ const AnimalsDetails: React.FC<Props> = ({ specie }) => {
                         <span className='text-sm'>{specie?.details?.conservationStatus}</span>
                     </div>
                     <div className="border-[1px] rounded-md p-2 flex flex-col flex-1 min-w-64">
-                        <span className="font-semibold text-sm">Diet:</span>
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">Diet:</span>
+                            <div className="flex items-center gap-1">
+                                {dietIcons.map((icon, index) => (
+                                    <img
+                                        key={index}
+                                        src={icon}
+                                        alt="Diet icon"
+                                        className="w-5 h-5 object-contain"
+                                    />
+                                ))}
+                            </div>
+                        </div>
                         <span className='text-sm'>{specie?.details?.diet}</span>
                     </div>
                     <div className="border-[1px] rounded-md p-2 flex flex-col flex-1 min-w-64">

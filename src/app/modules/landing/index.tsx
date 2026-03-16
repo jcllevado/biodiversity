@@ -17,6 +17,7 @@ import damselflyIcon from '../../../assets/pngs/damselfly.png';
 import frogIcon from '../../../assets/pngs/frog.png';
 import defaultFeather from '../../../assets/feathers/Feathers.png';
 import biodiversityLogo from '../../../assets/biodiversity-green.png';
+import ustpBioBackground from '../../../assets/ustp-bio.jpg';
 import cdoFeather from '../../../assets/feathers/CDO.png';
 import claveriaFeather from '../../../assets/feathers/Claveria.png';
 import jasaanFeather from '../../../assets/feathers/Jasaan.png';
@@ -365,7 +366,11 @@ export default function Landing() {
                         isOpen={speciesModal}
                         onClose={toggleSpeciesModal}
                         modalContainerClassName="w-full max-w-[95vw] sm:max-w-4xl lg:max-w-5xl"
-                        titleClass="text-base sm:text-xl font-medium text-white ml-2 sm:ml-5"
+                        headerClassName="bg-green-50 border-b-2 border-green-600"
+                        closeButtonClassName="text-green-700 bg-transparent hover:bg-green-100"
+                        bodyClassName="bg-cover bg-center bg-no-repeat"
+                        bodyStyle={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.76), rgba(255,255,255,0.76)), url(${ustpBioBackground})` }}
+                        titleClass="text-base sm:text-xl font-medium text-gray-900 ml-2 sm:ml-5"
                     >
                         <SpeciesDetails specie={specie?.speciesData ?? undefined} />
                     </Modal>
@@ -376,14 +381,16 @@ export default function Landing() {
                     <Modal
                         title={
                             <div className="flex items-center gap-2">
-                                <FaSearch size={20} className="text-white" />
+                                <FaSearch size={20} className="text-green-700" />
                                 <span>Search Species</span>
                             </div>
                         }
                         isOpen={searchModal}
                         onClose={toggleSearchModal}
                         modalContainerClassName="max-w-2xl"
-                        titleClass="text-xl font-medium text-white ml-5"
+                        headerClassName="bg-green-50 border-b-2 border-green-600"
+                        closeButtonClassName="text-green-700 bg-transparent hover:bg-green-100"
+                        titleClass="text-xl font-medium text-gray-900 ml-5"
                     >
                         <div className="p-4 sm:p-6">
                             <div className="mb-4">
@@ -471,7 +478,9 @@ export default function Landing() {
                         isOpen={campusModal}
                         onClose={toggleCampusModal}
                         modalContainerClassName="max-w-2xl"
-                        titleClass="text-xl font-medium text-white ml-5"
+                        headerClassName="bg-green-50 border-b-2 border-green-600"
+                        closeButtonClassName="text-green-700 bg-transparent hover:bg-green-100"
+                        titleClass="text-xl font-medium text-gray-900 ml-5"
                     >
                         <div className="p-4 sm:p-6">
                             <div className="grid grid-cols-1 gap-2 sm:gap-3">
@@ -513,14 +522,16 @@ export default function Landing() {
                     <Modal
                         title={
                             <div className="flex items-center gap-2">
-                                <FaLayerGroup size={20} className="text-white" />
+                                <FaLayerGroup size={20} className="text-green-700" />
                                 <span>Select Map Layer</span>
                             </div>
                         }
                         isOpen={mapLayerModal}
                         onClose={toggleMapLayerModal}
                         modalContainerClassName="max-w-lg"
-                        titleClass="text-xl font-medium text-white ml-5"
+                        headerClassName="bg-green-50 border-b-2 border-green-600"
+                        closeButtonClassName="text-green-700 bg-transparent hover:bg-green-100"
+                        titleClass="text-xl font-medium text-gray-900 ml-5"
                     >
                         <div className="p-4 sm:p-6">
                             <div className="grid grid-cols-1 gap-2 sm:gap-3">
@@ -574,7 +585,10 @@ export default function Landing() {
                         justifyContent: 'center',
                         alignItems: 'center',
                         flexDirection: 'column',
-                        backgroundColor: 'white'
+                        backgroundImage: `linear-gradient(rgba(255,255,255,0.82), rgba(255,255,255,0.82)), url(${ustpBioBackground})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
                     }}>
                         <div className="transition-content flex flex-col items-center justify-center">
                             <img src={USTPLogo} alt="USTP Logo" className="w-32 h-32 mb-6" />
