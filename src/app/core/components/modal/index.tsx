@@ -12,8 +12,12 @@ type Props = {
     modalContainerClassName?: string;
     bodyClassName?: string;
     bodyStyle?: CSSProperties;
+    contentClassName?: string;
     showCloseButton?: boolean;
     showHeader?: boolean;
+    closeOnBackdropClick?: boolean;
+    enableSwipeToClose?: boolean;
+    showBackdrop?: boolean;
 };
 
 const Modal: FC<Props> = ({
@@ -28,10 +32,16 @@ const Modal: FC<Props> = ({
     modalContainerClassName = "",
     bodyClassName = "",
     bodyStyle,
+    contentClassName = "",
     showCloseButton = true,
     showHeader = true,
+    closeOnBackdropClick = false,
+    enableSwipeToClose = false,
+    showBackdrop = true,
 }) => {
     const modalRef = useRef<HTMLDivElement>(null);
+    const touchStartYRef = useRef<number | null>(null);
+    const bodyPaddingClass = showHeader ? "p-4 md:p-10 md:pt-0" : "p-4 md:p-10";
 
     useEffect(() => {
         if (isOpen) {
@@ -41,11 +51,53 @@ const Modal: FC<Props> = ({
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                onClose();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose]);
+
+    const handleTouchStart: React.TouchEventHandler<HTMLDivElement> = (event) => {
+        if (!enableSwipeToClose) return;
+        touchStartYRef.current = event.touches[0]?.clientY ?? null;
+    };
+
+    const handleTouchEnd: React.TouchEventHandler<HTMLDivElement> = (event) => {
+        if (!enableSwipeToClose || touchStartYRef.current === null) return;
+        const touchEndY = event.changedTouches[0]?.clientY ?? touchStartYRef.current;
+        const deltaY = touchEndY - touchStartYRef.current;
+        touchStartYRef.current = null;
+
+        // Close on deliberate downward swipe.
+        if (deltaY > 90) {
+            onClose();
+        }
+    };
+
     return (
-        <div ref={modalRef} id="custom-modal" tabIndex={-1} className={`fixed inset-0 z-50 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto ${className}`}>
-            <div className="fixed inset-0 bg-black opacity-50"></div>
+        <div
+            ref={modalRef}
+            id="custom-modal"
+            tabIndex={-1}
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto ${className}`}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+        >
+            {showBackdrop && (
+                <div
+                    className="fixed inset-0 bg-black opacity-50"
+                    onClick={closeOnBackdropClick ? onClose : undefined}
+                ></div>
+            )}
             <div className={`relative w-full  max-h-full ${modalContainerClassName}`}>
-                <div className="relative bg-white rounded-lg shadow">
+                <div className={`relative bg-white rounded-lg shadow ${contentClassName}`}>
                     {showHeader && (
                         <div className={`flex items-center justify-between p-4 md:p-5 rounded-t ${headerClassName}`}>
                             {title && <h3 className={titleClass}>{title}</h3>}
@@ -64,7 +116,7 @@ const Modal: FC<Props> = ({
                         </div>
                     )}
                     {/* Modal body */}
-                    <div className={`p-4 md:p-10 md:pt-0 space-y-4 ${bodyClassName}`} style={bodyStyle}>{children}</div>
+                    <div className={`${bodyPaddingClass} space-y-4 ${bodyClassName}`} style={bodyStyle}>{children}</div>
                 </div>
             </div>
         </div>

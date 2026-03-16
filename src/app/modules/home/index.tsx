@@ -1,25 +1,78 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import USTPLogo from '../../../assets/ustp-logo-on-white.png';
-import { BiMapPin } from "react-icons/bi";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { BiMapPin } from "react-icons/bi";
+import { BiNavigation } from "react-icons/bi";
+import Modal from "../../core/components/modal";
+import ImageModal from "../../core/components/imagemodal";
 import { ICampus } from "../../core/interfaces/common.interface";
 import { supabase } from "../../core/lib/supabase";
 import { toast } from "react-toastify";
 import biodiversityLogo from '../../../assets/biodiversity-green.png';
 import defaultFeather from '../../../assets/feathers/Feathers.png';
+import cdoFeather from '../../../assets/feathers/CDO.png';
+import claveriaFeather from '../../../assets/feathers/Claveria.png';
+import jasaanFeather from '../../../assets/feathers/Jasaan.png';
+import villanuevaFeather from '../../../assets/feathers/Villanueva.png';
+import alubijidFeather from '../../../assets/feathers/Alubijid.png';
+import oroquietaFeather from '../../../assets/feathers/Oroquieta.png';
+import panaonFeather from '../../../assets/feathers/Panaon.png';
+import alibangbangCover from '../../../assets/covers/alibangbang.jpeg';
+import huniCover from '../../../assets/covers/huni.jpeg';
 import ustpBioBackground from '../../../assets/ustp-bio.jpg';
+import presidentImage from '../../../assets/leaders/ustp-president.jpg';
+import chancellorCdoImage from '../../../assets/leaders/chancellor-cdo.jpg';
+import chancellorClaveriaImage from '../../../assets/leaders/chancellor-claveria.jpg';
+import researchLeaderImage from '../../../assets/leaders/research-leader.png';
 
 const MIN_LOADING_DELAY_MS = 1200;
+const CAROUSEL_INTERVAL_MS = 3600;
+
+const campusFeatherMap: { keywords: string[]; image: string }[] = [
+    { keywords: ['cdo', 'cagayan de oro'], image: cdoFeather },
+    { keywords: ['claveria'], image: claveriaFeather },
+    { keywords: ['jasaan'], image: jasaanFeather },
+    { keywords: ['villanueva'], image: villanuevaFeather },
+    { keywords: ['alubijid'], image: alubijidFeather },
+    { keywords: ['oroquieta'], image: oroquietaFeather },
+    { keywords: ['panaon'], image: panaonFeather },
+];
+
+const speciesCarouselImages = [
+    { src: alibangbangCover, alt: 'Alibangbang cover' },
+    { src: huniCover, alt: 'Huni cover' },
+];
+
+const teamMembers = Array.from({ length: 32 }, (_, index) => ({
+    id: index + 1,
+    name: `Team Member ${index + 1}`,
+    role: 'Project Contributor',
+}));
 
 export default function Home() {
     const navigate = useNavigate();
     const [campuses, setCampuses] = useState<ICampus[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [carouselIndex, setCarouselIndex] = useState<number>(0);
+    const [campusModalOpen, setCampusModalOpen] = useState<boolean>(false);
+    const [isSectionHelperOpen, setIsSectionHelperOpen] = useState<boolean>(false);
+    const [carouselPreviewOpen, setCarouselPreviewOpen] = useState<boolean>(false);
+    const mainContentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         getCampuses();
     }, []);
+
+    useEffect(() => {
+        if (carouselPreviewOpen) return;
+
+        const interval = setInterval(() => {
+            setCarouselIndex((prev) => (prev + 1) % speciesCarouselImages.length);
+        }, CAROUSEL_INTERVAL_MS);
+
+        return () => clearInterval(interval);
+    }, [carouselPreviewOpen]);
 
     const getCampuses = async () => {
         const loadStartTime = Date.now();
@@ -52,6 +105,64 @@ export default function Home() {
         }
     }
 
+    const getCampusFeather = (campusName?: string | null) => {
+        if (!campusName) return defaultFeather;
+        const normalizedName = campusName.toLowerCase();
+        const match = campusFeatherMap.find(({ keywords }) => keywords.some((keyword) => normalizedName.includes(keyword)));
+        return match?.image ?? defaultFeather;
+    }
+
+    const scrollToSection = (sectionId: string) => {
+        const sectionElement = document.getElementById(sectionId);
+        if (!sectionElement) return;
+
+        if (window.innerWidth >= 1024 && mainContentRef.current) {
+            const container = mainContentRef.current;
+            const targetTop = sectionElement.offsetTop - container.offsetTop - 8;
+            container.scrollTo({ top: targetTop, behavior: 'smooth' });
+        } else {
+            sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        setIsSectionHelperOpen(false);
+    };
+
+    const sectionLinks = [
+        { id: 'about-ustp-biodiversity', label: 'About' },
+        { id: 'research-project-leader', label: 'Research Leader' },
+        { id: 'ustp-president', label: 'USTP President' },
+        { id: 'ustp-cdo-chancellor', label: 'CDO Chancellor' },
+        { id: 'ustp-claveria-chancellor', label: 'Claveria Chancellor' },
+        { id: 'team-members', label: 'Team Members' },
+    ];
+
+    const leadershipSections = [
+        {
+            title: 'Research Team Leader',
+            subtitle: 'CORDULO P. ASCAÑO II, PhD',
+            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer suscipit, mauris sed luctus tristique, eros sem luctus massa, at convallis nibh magna ac enim. This section highlights the research direction and current milestones of the biodiversity initiative.',
+            image: researchLeaderImage,
+        },
+        {
+            title: 'USTP President',
+            subtitle: 'DR. AMBROSIO B. CULTURA II',
+            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum mauris quis urna tincidunt, sed eleifend magna volutpat. This corner can feature institutional vision and support for sustainability and biodiversity-focused programs.',
+            image: presidentImage,
+        },
+        {
+            title: 'USTP CDO Chancellor',
+            subtitle: 'ATTY. DIONEL O. ALBINA',
+            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi in turpis dapibus, feugiat arcu id, lacinia velit. This area can present campus-level updates, local conservation efforts, and active biodiversity initiatives in CDO.',
+            image: chancellorCdoImage,
+        },
+        {
+            title: 'USTP Claveria Chancellor',
+            subtitle: 'DR. RENATO O. ARAZO',
+            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Duis a ante non est malesuada dictum. This section can showcase Claveria campus highlights, ecosystem stewardship, and biodiversity learning activities.',
+            image: chancellorClaveriaImage,
+        }
+    ];
+
     if (loading) {
         return (
             <div
@@ -83,133 +194,215 @@ export default function Home() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-            {/* Header */}
-            <header className="bg-white shadow-md">
-                <div className="container mx-auto px-4 py-4 sm:py-6">
-                    <div className="flex items-center justify-center gap-3 sm:gap-4">
-                        <img
-                            src={USTPLogo}
-                            alt="USTP Logo"
-                            className="h-12 w-12 sm:h-16 sm:w-16 object-contain"
-                        />
-                        <div className="text-center">
-                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-800">
-                                USTP Biodiversity
-                            </h1>
-                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                University of Science and Technology of Southern Philippines
-                            </p>
+        <div
+            className="min-h-screen lg:h-screen lg:overflow-hidden"
+            style={{
+                backgroundImage: `linear-gradient(rgba(255,255,255,0.84), rgba(255,255,255,0.84)), url(${ustpBioBackground})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundAttachment: 'fixed'
+            }}
+        >
+            <main className="w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 lg:h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-[30%_70%] gap-4 sm:gap-6 lg:gap-8 lg:h-full">
+                    <aside className="bg-white rounded-2xl shadow-lg border border-gray-200 p-3 sm:p-4 lg:p-4 lg:h-full lg:sticky lg:top-0 flex flex-col overflow-hidden">
+                        <div className="flex flex-col flex-1 min-h-0">
+                            <div className="relative flex-1 min-h-[340px] overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                                <button
+                                    type="button"
+                                    onClick={() => setCarouselPreviewOpen(true)}
+                                    className="w-full h-full p-0"
+                                    aria-label="View carousel image"
+                                >
+                                    <img
+                                        src={speciesCarouselImages[carouselIndex].src}
+                                        alt={speciesCarouselImages[carouselIndex].alt}
+                                        className="w-full h-full object-contain p-4 transition-opacity duration-500 cursor-zoom-in"
+                                    />
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setCampusModalOpen(true)}
+                                className="mt-4 mb-2 self-center rounded-xl bg-[#003DA5] text-white font-bold py-3 px-5 hover:bg-[#0E4DB8] transition-colors inline-flex items-center justify-center gap-2"
+                            >
+                                <BiMapPin className="text-lg" />
+                                Explore Our Campuses
+                            </button>
                         </div>
+                    </aside>
+
+                    <div ref={mainContentRef} className="space-y-4 sm:space-y-6 lg:h-full lg:overflow-y-auto lg:pr-2">
+                        <section className="space-y-6">
+                            <article id="about-ustp-biodiversity" className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-[#003DA5]/20">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-[#003DA5] mb-3">About USTP Biodiversity</h2>
+                                <div className="text-gray-700 space-y-3 leading-relaxed">
+                                    <p>
+                                        USTP Biodiversity is a digital initiative that documents, monitors, and celebrates species diversity across USTP campuses.
+                                        It provides a guided way to explore local flora and fauna while supporting learning, research, and conservation awareness.
+                                    </p>
+                                    <p>
+                                        This page is organized into dedicated content divisions to present program highlights and leadership perspectives.
+                                        The data and stories can be expanded over time as more campus biodiversity records are added.
+                                    </p>
+                                </div>
+                            </article>
+
+                            {leadershipSections.map((section) => (
+                                <article
+                                    id={section.title.toLowerCase().replace(/\s+/g, '-')}
+                                    key={section.title}
+                                    className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100"
+                                >
+                                    <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 items-center">
+                                        <div className="w-full sm:w-44 md:w-48 max-w-[300px] mx-auto sm:mx-0 flex-shrink-0">
+                                            <img
+                                                src={section.image}
+                                                alt={section.title}
+                                                className="w-full aspect-[4/5] sm:h-56 sm:aspect-auto rounded-xl border border-gray-200 bg-gray-50 object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 text-center sm:text-left">
+                                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{section.subtitle}</h3>
+                                            <p className="text-base sm:text-lg font-semibold text-[#003DA5] mt-1">{section.title}</p>
+                                            <p className="text-gray-700 leading-relaxed mt-4">{section.description}</p>
+                                        </div>
+                                    </div>
+                                </article>
+                            ))}
+
+                            <article id="team-members" className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+                                <div className="flex items-center justify-between gap-4 mb-5">
+                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Team Members</h3>
+                                    <span className="text-xs sm:text-sm font-semibold text-[#003DA5] bg-[#F2A900]/20 border border-[#F2A900]/45 rounded-full px-3 py-1">
+                                        {teamMembers.length}+ Members
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+                                    {teamMembers.map((member) => (
+                                        <div key={member.id} className="border border-gray-200 rounded-xl p-3 text-center bg-white hover:bg-[#003DA5]/5 transition-colors">
+                                            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center">
+                                                <span className="text-[10px] sm:text-xs font-semibold text-gray-500">Photo</span>
+                                            </div>
+                                            <p className="mt-2 text-xs sm:text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{member.name}</p>
+                                            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">{member.role}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </article>
+
+                            <footer className="mt-2">
+                                <div className="px-1 py-3 text-center">
+                                    <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                                        © {new Date().getFullYear()} University of Science and Technology of Southern Philippines.
+                                        All rights reserved.
+                                    </p>
+                                    <a
+                                        href="https://ustp.edu.ph/"
+                                        className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Visit USTP Website
+                                        <FaExternalLinkAlt size={10} />
+                                    </a>
+                                </div>
+                            </footer>
+                        </section>
+
                     </div>
                 </div>
-            </header>
+            </main>
 
-            {/* Main Content */}
-            <main className="container mx-auto px-4 py-8 sm:py-12 max-w-6xl">
-                {/* Introduction Section */}
-                <section className="mb-12 sm:mb-16">
-                    <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 md:p-10">
-                        <div className="prose prose-sm sm:prose-base max-w-none text-gray-700 space-y-4">
-                            <p className="text-base sm:text-lg leading-relaxed">
-                                USTP Biodiversity App is a comprehensive digital initiative designed to document,
-                                monitor, and celebrate the rich biological diversity found across the University of Science
-                                and Technology of Southern Philippines campuses.
-                            </p>
-                            <p className="leading-relaxed">
-                                This serves as an interactive repository showcasing various species of flora and fauna
-                                that inhabit our university grounds. From native trees and vibrant butterflies to diverse bird
-                                species and unique insects, each entry provides valuable insights into the ecological wealth
-                                of our region.
-                            </p>
-                            <p className="leading-relaxed">
-                                This initiative aims to:
-                            </p>
-                            <ul className="list-disc list-inside space-y-2 ml-4">
-                                <li>Promote environmental awareness and conservation among students and faculty</li>
-                                <li>Provide educational resources for research and learning</li>
-                                <li>Document and preserve knowledge about local biodiversity</li>
-                                <li>Foster appreciation for our natural heritage</li>
-                            </ul>
-                            <p className="leading-relaxed">
-                                Explore the interactive maps below to discover the biodiversity of each USTP campus.
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Campus Selection Section */}
-                <section>
-                    <div className="text-center mb-8 sm:mb-10">
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
-                            Explore Our Campuses
-                        </h2>
-                        <p className="text-sm sm:text-base text-gray-600">
-                            Select a campus to view its biodiversity map and discover the species found there
-                        </p>
-                    </div>
-
+            {campusModalOpen && (
+                <Modal
+                    title="USTP Campuses"
+                    isOpen={campusModalOpen}
+                    onClose={() => setCampusModalOpen(false)}
+                    modalContainerClassName="max-w-3xl"
+                    contentClassName="border-2 border-[#003DA5]/35"
+                    showHeader={false}
+                    closeOnBackdropClick={true}
+                    enableSwipeToClose={true}
+                >
                     {campuses.length === 0 ? (
-                        <div className="bg-white rounded-xl shadow-md p-8 text-center">
-                            <p className="text-gray-500">No campuses available at the moment.</p>
-                        </div>
+                        <div className="text-sm text-gray-600 py-2">No campuses available at the moment.</div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div className="w-full space-y-3 mt-2">
                             {campuses.map((campus, index) => (
                                 <button
                                     key={index}
-                                    onClick={() => handleCampusSelect(campus)}
-                                    className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 p-6 sm:p-8 text-left border-2 border-transparent hover:border-green-500 transform hover:-translate-y-1"
+                                    onClick={() => {
+                                        handleCampusSelect(campus);
+                                        setCampusModalOpen(false);
+                                    }}
+                                    className="group w-full rounded-xl border border-gray-200 p-3 sm:p-4 text-left hover:border-[#003DA5] hover:bg-[#003DA5]/5 transition-colors"
                                 >
-                                    <div className="flex items-start gap-4">
-                                        <div className="flex-shrink-0">
-                                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                                <BiMapPin className="text-white text-2xl sm:text-3xl" />
-                                            </div>
+                                    <div className="flex items-center gap-3 sm:gap-4">
+                                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-[#F2A900]/60 bg-white flex items-center justify-center overflow-hidden group-hover:border-[#F2A900] transition-colors flex-shrink-0">
+                                            <img
+                                                src={getCampusFeather(campus.campus)}
+                                                alt={`${campus.campus} feather`}
+                                                className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                                            />
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 group-hover:text-green-700 transition-colors">
-                                                    {campus.campus}
-                                                </h3>
-                                                <FaExternalLinkAlt className="text-gray-400 group-hover:text-green-600 flex-shrink-0 mt-1 transition-colors" />
-                                            </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-lg sm:text-xl font-extrabold text-[#003DA5] leading-tight truncate tracking-wide">
+                                                {campus.campus}
+                                            </p>
                                             {campus.address && (
-                                                <p className="text-sm sm:text-base text-gray-600 mt-2 leading-relaxed">
+                                                <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate">
                                                     {campus.address}
                                                 </p>
                                             )}
-                                            <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-green-600 group-hover:text-green-700">
-                                                <span>Explore biodiversity</span>
-                                                <FaExternalLinkAlt className="text-xs" />
-                                            </div>
                                         </div>
+                                        <FaExternalLinkAlt className="text-sm text-[#003DA5] flex-shrink-0" />
                                     </div>
                                 </button>
                             ))}
                         </div>
                     )}
-                </section>
-            </main>
+                </Modal>
+            )}
 
-            {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 mt-12 sm:mt-16">
-                <div className="container mx-auto px-4 py-6 text-center">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                        © {new Date().getFullYear()} University of Science and Technology of Southern Philippines.
-                        All rights reserved.
-                    </p>
-                    <a
-                        href="https://ustp.edu.ph/"
-                        className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
-                        target="_blank"
-                        rel="noopener noreferrer"
+            {carouselPreviewOpen && (
+                <ImageModal isOpen={carouselPreviewOpen} onClose={() => setCarouselPreviewOpen(false)}>
+                    <div className="flex flex-col items-center justify-center w-full h-full">
+                        <img
+                            src={speciesCarouselImages[carouselIndex].src}
+                            alt={speciesCarouselImages[carouselIndex].alt}
+                            className="max-w-full max-h-full w-auto h-auto object-contain"
+                        />
+                    </div>
+                </ImageModal>
+            )}
+
+            <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2">
+                {sectionLinks.map((link, index) => (
+                    <button
+                        key={link.id}
+                        type="button"
+                        onClick={() => scrollToSection(link.id)}
+                        className={`inline-flex items-center gap-2 rounded-full bg-white border border-[#003DA5]/25 text-[#003DA5] text-sm font-semibold px-3 py-2 shadow-md hover:bg-[#003DA5]/10 transition-all duration-200 ${isSectionHelperOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'}`}
+                        style={{ transitionDelay: isSectionHelperOpen ? `${index * 45}ms` : '0ms' }}
+                        aria-label={`Go to ${link.label}`}
                     >
-                        Visit USTP Website
-                        <FaExternalLinkAlt size={10} />
-                    </a>
-                </div>
-            </footer>
+                        <span className="w-2 h-2 rounded-full bg-[#F2A900]"></span>
+                        {link.label}
+                    </button>
+                ))}
+
+                <button
+                    type="button"
+                    onClick={() => setIsSectionHelperOpen((prev) => !prev)}
+                    className="h-14 w-14 rounded-full bg-[#003DA5] text-white shadow-xl hover:bg-[#0E4DB8] inline-flex items-center justify-center"
+                    aria-label="Toggle section navigation"
+                >
+                    <BiNavigation className={`text-2xl transition-transform duration-200 ${isSectionHelperOpen ? 'rotate-45' : 'rotate-0'}`} />
+                </button>
+            </div>
         </div>
     );
 }
