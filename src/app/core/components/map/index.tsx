@@ -93,7 +93,7 @@ const MapComponent: FC<MapComponentProps> = ({
     campuses,
     campusSpecies,
     handleModal,
-    selectedMapLayer = 'stadia',
+    selectedMapLayer = 'esri',
     campusId,
     coordinatesParams,
     categoryParam,

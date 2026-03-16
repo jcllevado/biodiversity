@@ -53,14 +53,8 @@ export const mapLayers = {
     attribution:
       "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
   },
-  stadia: {
-    name: "Stadia",
-    url: "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.png?api_key=pk.eyJ1IjoiZGF2aWQtZGV2IiwiYSI6ImNrYjV5c3V4ZDA0dG8zb3A4bXl1cG8ifQ.9n7sHqLh9iKkKjN8mXoXw",
-    attribution:
-      '<a href="https://stadiamaps.com/" target="_blank">&copy; Stadia Maps</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
-  },
 };
 
 export default {
-  maptiler: mapLayers.stadia,
+  maptiler: mapLayers.esri,
 };
