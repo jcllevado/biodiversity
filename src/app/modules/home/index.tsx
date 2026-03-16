@@ -6,7 +6,11 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 import { ICampus } from "../../core/interfaces/common.interface";
 import { supabase } from "../../core/lib/supabase";
 import { toast } from "react-toastify";
-import Loader from "../../core/components/loader";
+import biodiversityLogo from '../../../assets/biodiversity-green.png';
+import defaultFeather from '../../../assets/feathers/Feathers.png';
+import ustpBioBackground from '../../../assets/ustp-bio.jpg';
+
+const MIN_LOADING_DELAY_MS = 1200;
 
 export default function Home() {
     const navigate = useNavigate();
@@ -18,6 +22,7 @@ export default function Home() {
     }, []);
 
     const getCampuses = async () => {
+        const loadStartTime = Date.now();
         const table = "campus";
         try {
             const response = await supabase
@@ -35,7 +40,9 @@ export default function Home() {
         } catch (error: unknown) {
             toast.error((error as Error).message);
         } finally {
-            setLoading(false);
+            const elapsed = Date.now() - loadStartTime;
+            const remainingDelay = Math.max(MIN_LOADING_DELAY_MS - elapsed, 0);
+            setTimeout(() => setLoading(false), remainingDelay);
         }
     }
 
@@ -47,8 +54,30 @@ export default function Home() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
-                <Loader />
+            <div
+                className="min-h-screen flex flex-col items-center justify-center px-6"
+                style={{
+                    backgroundImage: `linear-gradient(rgba(255,255,255,0.82), rgba(255,255,255,0.82)), url(${ustpBioBackground})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat'
+                }}
+            >
+                <img
+                    src={USTPLogo}
+                    alt="USTP Logo"
+                    className="w-24 h-24 sm:w-28 sm:h-28 mb-4 object-contain"
+                />
+                <img
+                    src={biodiversityLogo}
+                    alt="Biodiversity"
+                    className="w-64 sm:w-80 md:w-96 mb-6 object-contain"
+                />
+                <img
+                    src={defaultFeather}
+                    alt="Loading biodiversity map"
+                    className="home-feather-loader w-[min(78vw,460px)] h-[min(44vh,320px)] object-contain"
+                />
             </div>
         );
     }
