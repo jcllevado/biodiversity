@@ -241,7 +241,7 @@ export default function Home() {
 
                     <div ref={mainContentRef} className="space-y-4 sm:space-y-6 lg:h-full lg:overflow-y-auto lg:pr-2">
                         <section className="space-y-6">
-                            <article id="about-ustp-biodiversity" className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-[#003DA5]/20">
+                            <article id="about-ustp-biodiversity" className="p-6 sm:p-8">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-[#003DA5] mb-3">About USTP Biodiversity</h2>
                                 <div className="text-gray-700 space-y-3 leading-relaxed">
                                     <p>
@@ -259,7 +259,7 @@ export default function Home() {
                                 <article
                                     id={section.title.toLowerCase().replace(/\s+/g, '-')}
                                     key={section.title}
-                                    className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100"
+                                    className="p-6 sm:p-8"
                                 >
                                     <div className="flex flex-col gap-5 sm:gap-6 items-center">
                                         <div className="w-full sm:w-56 md:w-64 max-w-[300px] mx-auto flex-shrink-0">
@@ -286,7 +286,7 @@ export default function Home() {
                                 </article>
                             ))}
 
-                            <article id="team-members" className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+                            <article id="team-members" className="p-6 sm:p-8">
                                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5">Team Members</h3>
 
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
