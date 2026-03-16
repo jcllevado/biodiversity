@@ -269,7 +269,7 @@ export default function Home() {
                                 <article
                                     id={section.title.toLowerCase().replace(/\s+/g, '-')}
                                     key={section.title}
-                                    className="p-6 sm:p-8"
+                                    className="p-6 sm:p-8 border-b border-gray-300"
                                 >
                                     <div className="flex flex-col gap-5 sm:gap-6 items-center">
                                         <div className="w-full sm:w-56 md:w-64 max-w-[300px] mx-auto flex-shrink-0">
@@ -282,7 +282,7 @@ export default function Home() {
                                         <div className="flex-1 text-center w-full">
                                             <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{section.subtitle}</h3>
                                             <p className="text-base sm:text-lg font-semibold text-[#003DA5] mt-1">{section.title}</p>
-                                            <div className="text-gray-700 leading-relaxed mt-4 text-justify space-y-3">
+                                            <div className="text-gray-700 text-base sm:text-lg leading-relaxed mt-4 text-justify space-y-3">
                                                 {Array.isArray(section.description) ? (
                                                     section.description.map((paragraph, idx) => (
                                                         <p key={idx} className="indent-8">{paragraph}</p>
