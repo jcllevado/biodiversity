@@ -287,12 +287,7 @@ export default function Home() {
                             ))}
 
                             <article id="team-members" className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-                                <div className="flex items-center justify-between gap-4 mb-5">
-                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Team Members</h3>
-                                    <span className="text-xs sm:text-sm font-semibold text-[#003DA5] bg-[#F2A900]/20 border border-[#F2A900]/45 rounded-full px-3 py-1">
-                                        {teamMembers.length}+ Members
-                                    </span>
-                                </div>
+                                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5">Team Members</h3>
 
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                                     {teamMembers.map((member) => (
