@@ -4,7 +4,7 @@ import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { BiMapPin } from "react-icons/bi";
 import { BiNavigation } from "react-icons/bi";
-import { BiCart } from "react-icons/bi";
+import { BiPhone } from "react-icons/bi";
 import Modal from "../../core/components/modal";
 import ImageModal from "../../core/components/imagemodal";
 import { ICampus } from "../../core/interfaces/common.interface";
@@ -242,8 +242,8 @@ export default function Home() {
                                     type="button"
                                     className="rounded-xl bg-[#F2A900] text-gray-900 font-bold py-3 px-5 hover:bg-[#E69500] transition-colors inline-flex items-center justify-center gap-2"
                                 >
-                                    <BiCart className="text-lg" />
-                                    Buy our Coffee Table
+                                    <BiPhone className="text-lg" />
+                                    Order our Coffee Table
                                 </button>
                             </div>
                         </div>
