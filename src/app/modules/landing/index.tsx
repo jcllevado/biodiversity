@@ -98,7 +98,6 @@ export default function Landing() {
     // const toggleShowModal = () => setShowModal(!showModal);
     const toggleShowPanel = () => setShowPanel(!showPanel);
     const [selectedCampusData, setSelectedCampusData] = useState<ICampus | null>(null);
-    const [isInitialized, setIsInitialized] = useState<boolean>(false);
     const [showCampusFeather, setShowCampusFeather] = useState<boolean>(false);
 
     // Redirect to home if no campusId is provided
@@ -300,25 +299,24 @@ export default function Landing() {
         let swapTimeout: number | undefined;
         let mapTimeout: number | undefined;
 
-        if (!isInitialized) {
-            setIsShowMap(false);
-            setSelectedCampusData(null);
-            setShowCampusFeather(false);
+        setIsShowMap(false);
+        setShowCampusFeather(false);
 
-            const loadData = async () => {
-                await getCampuses();
-                await getAllCampusSpecies();
-                setIsInitialized(true);
-                swapTimeout = window.setTimeout(() => {
-                    setShowCampusFeather(true);
-                }, GENERIC_FEATHER_DURATION_MS);
-                mapTimeout = window.setTimeout(() => {
-                    setIsShowMap(true);
-                }, GENERIC_FEATHER_DURATION_MS + CAMPUS_FEATHER_PREVIEW_MS);
-            };
+        // Start transition timers immediately so slow network requests
+        // do not block map rendering in production or local development.
+        swapTimeout = window.setTimeout(() => {
+            setShowCampusFeather(true);
+        }, GENERIC_FEATHER_DURATION_MS);
+        mapTimeout = window.setTimeout(() => {
+            setIsShowMap(true);
+        }, GENERIC_FEATHER_DURATION_MS + CAMPUS_FEATHER_PREVIEW_MS);
 
-            loadData();
-        }
+        const loadData = async () => {
+            await getCampuses();
+            await getAllCampusSpecies();
+        };
+
+        loadData();
 
         return () => {
             setIsShowMap(false);
@@ -329,7 +327,7 @@ export default function Landing() {
                 clearTimeout(mapTimeout);
             }
         }
-    }, [isInitialized, getCampuses, getAllCampusSpecies]);
+    }, [getCampuses, getAllCampusSpecies]);
 
     useEffect(() => {
         // Find the searched species based on coordinates in URL
