@@ -25,6 +25,12 @@ import presidentImage from '../../../assets/leaders/ustp-president.jpg';
 import chancellorCdoImage from '../../../assets/leaders/chancellor-cdo.jpg';
 import chancellorClaveriaImage from '../../../assets/leaders/chancellor-claveria.jpg';
 import researchLeaderImage from '../../../assets/leaders/research-leader.png';
+import {
+    RESEARCH_TEAM_LEADER_MESSAGE,
+    USTP_CDO_CHANCELLOR_MESSAGE,
+    USTP_CLAVERIA_CHANCELLOR_MESSAGE,
+    USTP_PRESIDENT_MESSAGE,
+} from './constants/leader-messages/index';
 
 const MIN_LOADING_DELAY_MS = 1200;
 const CAROUSEL_INTERVAL_MS = 3600;
@@ -140,25 +146,25 @@ export default function Home() {
         {
             title: 'Research Team Leader',
             subtitle: 'CORDULO P. ASCAÑO II, PhD',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer suscipit, mauris sed luctus tristique, eros sem luctus massa, at convallis nibh magna ac enim. This section highlights the research direction and current milestones of the biodiversity initiative.',
+            description: RESEARCH_TEAM_LEADER_MESSAGE,
             image: researchLeaderImage,
         },
         {
             title: 'USTP President',
             subtitle: 'DR. AMBROSIO B. CULTURA II',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum mauris quis urna tincidunt, sed eleifend magna volutpat. This corner can feature institutional vision and support for sustainability and biodiversity-focused programs.',
+            description: USTP_PRESIDENT_MESSAGE,
             image: presidentImage,
         },
         {
             title: 'USTP CDO Chancellor',
             subtitle: 'ATTY. DIONEL O. ALBINA',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi in turpis dapibus, feugiat arcu id, lacinia velit. This area can present campus-level updates, local conservation efforts, and active biodiversity initiatives in CDO.',
+            description: USTP_CDO_CHANCELLOR_MESSAGE,
             image: chancellorCdoImage,
         },
         {
             title: 'USTP Claveria Chancellor',
             subtitle: 'DR. RENATO O. ARAZO',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse potenti. Duis a ante non est malesuada dictum. This section can showcase Claveria campus highlights, ecosystem stewardship, and biodiversity learning activities.',
+            description: USTP_CLAVERIA_CHANCELLOR_MESSAGE,
             image: chancellorClaveriaImage,
         }
     ];
@@ -255,18 +261,26 @@ export default function Home() {
                                     key={section.title}
                                     className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100"
                                 >
-                                    <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 items-center">
-                                        <div className="w-full sm:w-44 md:w-48 max-w-[300px] mx-auto sm:mx-0 flex-shrink-0">
+                                    <div className="flex flex-col gap-5 sm:gap-6 items-center">
+                                        <div className="w-full sm:w-56 md:w-64 max-w-[300px] mx-auto flex-shrink-0">
                                             <img
                                                 src={section.image}
                                                 alt={section.title}
-                                                className="w-full aspect-[4/5] sm:h-56 sm:aspect-auto rounded-xl border border-gray-200 bg-gray-50 object-cover"
+                                                className="w-full aspect-[4/5] rounded-xl border border-gray-200 bg-gray-50 object-cover"
                                             />
                                         </div>
-                                        <div className="flex-1 text-center sm:text-left">
+                                        <div className="flex-1 text-center w-full">
                                             <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{section.subtitle}</h3>
                                             <p className="text-base sm:text-lg font-semibold text-[#003DA5] mt-1">{section.title}</p>
-                                            <p className="text-gray-700 leading-relaxed mt-4">{section.description}</p>
+                                            <div className="text-gray-700 leading-relaxed mt-4 text-justify space-y-3">
+                                                {Array.isArray(section.description) ? (
+                                                    section.description.map((paragraph, idx) => (
+                                                        <p key={idx} className="indent-8">{paragraph}</p>
+                                                    ))
+                                                ) : (
+                                                    <p className="indent-8">{section.description}</p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </article>
