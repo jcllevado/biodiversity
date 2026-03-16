@@ -4,6 +4,7 @@ import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { BiMapPin } from "react-icons/bi";
 import { BiNavigation } from "react-icons/bi";
+import { BiCart } from "react-icons/bi";
 import Modal from "../../core/components/modal";
 import ImageModal from "../../core/components/imagemodal";
 import { ICampus } from "../../core/interfaces/common.interface";
@@ -228,14 +229,23 @@ export default function Home() {
                                     />
                                 </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => setCampusModalOpen(true)}
-                                className="mt-4 mb-2 self-center rounded-xl bg-[#003DA5] text-white font-bold py-3 px-5 hover:bg-[#0E4DB8] transition-colors inline-flex items-center justify-center gap-2"
-                            >
-                                <BiMapPin className="text-lg" />
-                                Explore Our Campuses
-                            </button>
+                            <div className="mt-4 mb-2 flex items-center justify-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setCampusModalOpen(true)}
+                                    className="rounded-xl bg-[#003DA5] text-white font-bold py-3 px-5 hover:bg-[#0E4DB8] transition-colors inline-flex items-center justify-center gap-2"
+                                >
+                                    <BiMapPin className="text-lg" />
+                                    Explore Our Campuses
+                                </button>
+                                <button
+                                    type="button"
+                                    className="rounded-xl bg-[#F2A900] text-gray-900 font-bold py-3 px-5 hover:bg-[#E69500] transition-colors inline-flex items-center justify-center gap-2"
+                                >
+                                    <BiCart className="text-lg" />
+                                    Buy our Coffee Table
+                                </button>
+                            </div>
                         </div>
                     </aside>
 
