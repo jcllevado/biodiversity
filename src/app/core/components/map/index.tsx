@@ -221,7 +221,7 @@ const MapComponent: FC<MapComponentProps> = ({
                     </div>
                 </div>
 
-                <MapContainer center={coordinates} zoom={getResponsiveZoom()} scrollWheelZoom={true} zoomControl={false}>
+                <MapContainer className={`map-layer-${selectedMapLayer}`} center={coordinates} zoom={getResponsiveZoom()} scrollWheelZoom={true} zoomControl={false}>
                     <TileLayer
                         key={selectedMapLayer}
                         url={mapLayers[selectedMapLayer as keyof typeof mapLayers]?.url || mapLayers.esri.url}

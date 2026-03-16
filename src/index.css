@@ -26,6 +26,10 @@ body {
   height: 100vh;
 }
 
+.map-layer-stadia .leaflet-tile {
+  filter: brightness(1.14) saturate(1.06);
+}
+
 /* Hide scrollbar for Chrome, Safari and Opera */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
