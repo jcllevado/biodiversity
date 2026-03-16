@@ -41,8 +41,20 @@ export const mapLayers = {
     attribution:
       '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
   },
+  gbif: {
+    name: "GBIF",
+    url: "https://tile.gbif.org/3857/omt/{z}/{x}/{y}@1x.png",
+    attribution:
+      '<a href="https://www.gbif.org/" target="_blank">&copy; GBIF</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+  },
+  esri: {
+    name: "Esri Satellite",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution:
+      "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+  },
 };
 
 export default {
-  maptiler: mapLayers.satellite,
+  maptiler: mapLayers.esri,
 };

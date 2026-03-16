@@ -5,14 +5,14 @@ import { MapContainer, Marker, TileLayer, useMap, ZoomControl, Tooltip } from "r
 import { mapLayers } from '../../constants/osm-maptiler';
 import mapPin from '../../../../assets/pin2.png'
 import schoolPin from '../../../../assets/schoolmap-pin.png'
-import birdIcon from '../../../../assets/svgs/bird.svg'
-import batIcon from '../../../../assets/svgs/bat.svg'
-import treeIcon from '../../../../assets/svgs/tree.svg'
-import mangroveIcon from '../../../../assets/svgs/mangrove.svg'
-import butterflyIcon from '../../../../assets/svgs/butterfly.svg'
-import dragonflyIcon from '../../../../assets/svgs/dragonfly.svg'
-import damselflyIcon from '../../../../assets/svgs/damselfly.svg'
-import frogIcon from '../../../../assets/svgs/frog.svg'
+import birdIcon from '../../../../assets/pngs/bird.png'
+import batIcon from '../../../../assets/pngs/bat.png'
+import treeIcon from '../../../../assets/pngs/tree.png'
+import mangroveIcon from '../../../../assets/pngs/mangrove.png'
+import butterflyIcon from '../../../../assets/pngs/butterfly.png'
+import dragonflyIcon from '../../../../assets/pngs/dragonfly.png'
+import damselflyIcon from '../../../../assets/pngs/damselfly.png'
+import frogIcon from '../../../../assets/pngs/frog.png'
 import { ICampus, ICampusSpecies } from '../../interfaces/common.interface';
 import fallbackImage from "../../../../assets/fallback-image.jpg";
 import { SpeciesCategory } from '../../enums/species';
@@ -25,6 +25,7 @@ type MapComponentProps = {
     campusId?: string | null;
     coordinatesParams?: string | null;
     categoryParam?: string | null;
+    scientificNameParam?: string | null;
     zoomLevel?: number;
 };
 
@@ -49,20 +50,20 @@ const categoryIconMap: Record<string, string> = {
     [SpeciesCategory.FROGS]: frogIcon,
 };
 
-// Get SVG icon for filter button
+// Get category icon for filter button
 const getFilterIcon = (category: string) => {
     return categoryIconMap[category] || mapPin;
 };
 
 // Function to create icon based on category
-const createCategoryIcon = (category: string | undefined, isHighlighted: boolean = false) => {
+const createCategoryIcon = (category: string | undefined, opacity: number = 1) => {
     const iconUrl = category ? categoryIconMap[category.toLowerCase()] || mapPin : mapPin;
     return L.icon({
         iconUrl: iconUrl,
-        iconSize: isHighlighted ? [50, 50] : [35, 35],
-        iconAnchor: isHighlighted ? [25, 50] : [17, 35],
-        popupAnchor: [0, isHighlighted ? -50 : -35],
-        className: isHighlighted ? 'highlighted-marker' : '',
+        iconSize: [35, 35],
+        iconAnchor: [17, 35],
+        popupAnchor: [0, -35],
+        className: opacity < 1 ? 'category-marker-icon faded-marker' : 'category-marker-icon',
     });
 };
 
@@ -70,10 +71,11 @@ const MapComponent: FC<MapComponentProps> = ({
     campuses,
     campusSpecies,
     handleModal,
-    selectedMapLayer = 'satellite',
+    selectedMapLayer = 'esri',
     campusId,
     coordinatesParams,
     categoryParam,
+    scientificNameParam,
     zoomLevel = 40
 }) => {
 
@@ -90,7 +92,6 @@ const MapComponent: FC<MapComponentProps> = ({
         // Initialize filter based on category from URL or default to birds
         return categoryParam ? [categoryParam] : [SpeciesCategory.BIRDS];
     });
-    const [highlightedSpecies, setHighlightedSpecies] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 640);
 
     // Adjust zoom level for mobile
@@ -142,24 +143,10 @@ const MapComponent: FC<MapComponentProps> = ({
             // Update filter if category is provided
             if (categoryParam) {
                 setSelectedFilters([categoryParam]);
-
-                // Find and highlight the species at these coordinates
-                const targetSpecies = campusSpecies.find(
-                    species => species.latitude === coords[1].toString() && species.longitude === coords[0].toString()
-                );
-                if (targetSpecies && targetSpecies.id) {
-                    setHighlightedSpecies(targetSpecies.id.toString());
-                } else {
-                    setHighlightedSpecies(null);
-                }
-            } else {
-                // No category means no search is active, clear highlight
-                setHighlightedSpecies(null);
             }
         } else if (campuses.length > 0) {
             const campus = campuses[0];
             setCoordinates([Number(campus.latitude), Number(campus.longitude)]);
-            setHighlightedSpecies(null);
         }
     }, [campusId, coordinatesParams, categoryParam, campuses, campusSpecies]);
 
@@ -194,7 +181,7 @@ const MapComponent: FC<MapComponentProps> = ({
                                 key={category}
                                 onClick={() => toggleFilter(category)}
                                 className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap w-full sm:w-auto flex items-center justify-center gap-1.5 ${selectedFilters.includes(category)
-                                    ? 'bg-green-600 text-white'
+                                    ? 'bg-white text-green-700 border border-green-600'
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                             >
@@ -215,13 +202,16 @@ const MapComponent: FC<MapComponentProps> = ({
                 <MapContainer center={coordinates} zoom={getResponsiveZoom()} scrollWheelZoom={true} zoomControl={false}>
                     <TileLayer
                         key={selectedMapLayer}
-                        url={mapLayers[selectedMapLayer as keyof typeof mapLayers]?.url || mapLayers.satellite.url}
-                        attribution={mapLayers[selectedMapLayer as keyof typeof mapLayers]?.attribution || mapLayers.satellite.attribution}
+                        url={mapLayers[selectedMapLayer as keyof typeof mapLayers]?.url || mapLayers.esri.url}
+                        attribution={mapLayers[selectedMapLayer as keyof typeof mapLayers]?.attribution || mapLayers.esri.attribution}
                     />
                     {
                         filteredCampusSpecies.map((data, index) => {
-                            const isHighlighted = highlightedSpecies === data.id?.toString();
-                            const categoryIcon = createCategoryIcon(data.speciesData?.category, isHighlighted);
+                            // Check if this species matches the search (has same scientific name)
+                            const isMatch = !scientificNameParam ||
+                                (scientificNameParam && data.speciesData?.scientificName === decodeURIComponent(scientificNameParam));
+                            const opacity = isMatch ? 1 : 0.3;
+                            const categoryIcon = createCategoryIcon(data.speciesData?.category, opacity);
                             return <Marker
                                 key={index}
                                 position={[Number(data.latitude), Number(data.longitude)]}

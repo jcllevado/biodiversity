@@ -10,6 +10,25 @@ import { TAnimalsDetails, TInsectDetails, TPlantsDetails } from '../../types/com
 import AnimalsDetails from '../../../modules/dashboard/details/AnimalsDetails';
 import PlantsDetails from '../../../modules/dashboard/details/PlantsDetails';
 import InsectsDetails from '../../../modules/dashboard/details/InsectsDetails';
+import birdIcon from '../../../../assets/pngs/bird.png';
+import batIcon from '../../../../assets/pngs/bat.png';
+import treeIcon from '../../../../assets/pngs/tree.png';
+import mangroveIcon from '../../../../assets/pngs/mangrove.png';
+import butterflyIcon from '../../../../assets/pngs/butterfly.png';
+import dragonflyIcon from '../../../../assets/pngs/dragonfly.png';
+import damselflyIcon from '../../../../assets/pngs/damselfly.png';
+import frogIcon from '../../../../assets/pngs/frog.png';
+
+const speciesIconMap: Record<string, string> = {
+    birds: birdIcon,
+    bats: batIcon,
+    trees: treeIcon,
+    mangroves: mangroveIcon,
+    butterfly: butterflyIcon,
+    dragonfly: dragonflyIcon,
+    damselfly: damselflyIcon,
+    frogs: frogIcon,
+};
 
 interface SpeciesProps {
     specie?: ISpecies;
@@ -22,6 +41,15 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
     const [selectedImage, setSelectedImage] = React.useState<string>('');
     const [imageModal, setImageModal] = React.useState<boolean>(false);
     const toggleImageModal = () => setImageModal(!imageModal);
+
+    const getSpecieIconFallback = () => {
+        const category = specie?.category?.toLowerCase() || '';
+        return speciesIconMap[category] || fallbackImage;
+    };
+
+    const primaryImageSrc = specie?.gdriveid
+        ? `https://drive.google.com/thumbnail?id=${specie.gdriveid}&sz=w1000`
+        : getSpecieIconFallback();
 
     const handleImageModal = (image: string) => {
         setSelectedImage(image);
@@ -74,28 +102,18 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
                         </div>
                     </div>
                     }
-                    {specie?.gdriveid &&
-                        <img
-                            src={`https://drive.google.com/thumbnail?id=${specie?.gdriveid}&sz=w1000`}
-                            alt={specie?.commonName ?? ''}
-                            onLoad={() => setImageLoaded(true)}
-                            className={`hover:cursor-pointer hover:opacity-90 ${imageLoaded ? 'block' : 'hidden'}`}
-                            onError={e => e.currentTarget.src = fallbackImage}
-                            onClick={() => handleImageModal(`https://drive.google.com/thumbnail?id=${specie?.gdriveid}&sz=w1000`)}
-                        />
-                    }
-                    {
-                        !specie?.gdriveid &&
-                        <div className="flex justify-center">
-                            <img
-                                src={`https://drive.google.com/thumbnail?id=${specie?.gdriveid}&sz=w1000`}
-                                alt={specie?.commonName ?? ''}
-                                onLoad={() => setImageLoaded(true)}
-                                className={`hover:cursor-pointer hover:opacity-90 ${imageLoaded ? 'block' : 'hidden'}`}
-                                onError={e => e.currentTarget.src = fallbackImage}
-                            />
-                        </div>
-                    }
+                    <img
+                        src={primaryImageSrc}
+                        alt={specie?.commonName ?? ''}
+                        onLoad={() => setImageLoaded(true)}
+                        className={`hover:cursor-pointer hover:opacity-90 ${imageLoaded ? 'block' : 'hidden'}`}
+                        onError={e => e.currentTarget.src = getSpecieIconFallback()}
+                        onClick={() => {
+                            if (specie?.gdriveid) {
+                                handleImageModal(primaryImageSrc);
+                            }
+                        }}
+                    />
                     <div className="flex flex-col justify-start mt-2 gap-y-1 border-[1px] rounded-md p-1.5 sm:p-2">
                         <div className="flex flex-row gap-x-2 border-b-[1px] pb-1 sm:pb-2">
                             <span className="font-semibold text-xs sm:text-sm">Kingdom: </span>

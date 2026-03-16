@@ -14,7 +14,7 @@ type Props = {
 
 const Modal: FC<Props> = ({
     title,
-    titleClass = "text-xl font-medium text-gray-900",
+    titleClass = "text-xl font-medium text-white",
     children,
     isOpen,
     onClose,
@@ -39,12 +39,12 @@ const Modal: FC<Props> = ({
             <div className={`relative w-full  max-h-full ${modalContainerClassName}`}>
                 <div className="relative bg-white rounded-lg shadow">
                     {showHeader && (
-                        <div className="flex items-center justify-between p-4 md:p-5 rounded-t border-gray-200">
+                        <div className="flex items-center justify-between p-4 md:p-5 rounded-t bg-green-600">
                             {title && <h3 className={titleClass}>{title}</h3>}
                             {showCloseButton && (
                                 <button
                                     type="button"
-                                    className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                                    className="text-white bg-transparent hover:bg-green-700 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
                                     onClick={onClose}
                                 >
                                     <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">

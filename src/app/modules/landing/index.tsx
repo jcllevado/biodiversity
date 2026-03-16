@@ -7,9 +7,61 @@ import { FaSearch, FaLayerGroup } from "react-icons/fa";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Modal from "../../core/components/modal";
 import SpeciesDetails from "../../core/components/speciesdetails";
+import birdIcon from '../../../assets/pngs/bird.png';
+import batIcon from '../../../assets/pngs/bat.png';
+import treeIcon from '../../../assets/pngs/tree.png';
+import mangroveIcon from '../../../assets/pngs/mangrove.png';
+import butterflyIcon from '../../../assets/pngs/butterfly.png';
+import dragonflyIcon from '../../../assets/pngs/dragonfly.png';
+import damselflyIcon from '../../../assets/pngs/damselfly.png';
+import frogIcon from '../../../assets/pngs/frog.png';
+import defaultFeather from '../../../assets/feathers/Feathers.png';
+import biodiversityLogo from '../../../assets/biodiversity-green.png';
+import cdoFeather from '../../../assets/feathers/CDO.png';
+import claveriaFeather from '../../../assets/feathers/Claveria.png';
+import jasaanFeather from '../../../assets/feathers/Jasaan.png';
+import villanuevaFeather from '../../../assets/feathers/Villanueva.png';
+import alubijidFeather from '../../../assets/feathers/Alubijid.png';
+import oroquietaFeather from '../../../assets/feathers/Oroquieta.png';
+import panaonFeather from '../../../assets/feathers/Panaon.png';
 import { ICampus, ICampusSpecies } from "../../core/interfaces/common.interface";
 import { supabase } from "../../core/lib/supabase";
+import { SpeciesCategory } from "../../core/enums/species";
 import { toast } from "react-toastify";
+
+const speciesModalIconMap: Record<string, string> = {
+    [SpeciesCategory.BIRDS]: birdIcon,
+    [SpeciesCategory.BATS]: batIcon,
+    [SpeciesCategory.TREES]: treeIcon,
+    [SpeciesCategory.MANGROVES]: mangroveIcon,
+    [SpeciesCategory.BUTTERFLY]: butterflyIcon,
+    [SpeciesCategory.DRAGONFLY]: dragonflyIcon,
+    [SpeciesCategory.DAMSELFLY]: damselflyIcon,
+    [SpeciesCategory.FROGS]: frogIcon,
+};
+
+const campusFeatherMap: { keywords: string[]; image: string }[] = [
+    { keywords: ['cdo', 'cagayan de oro'], image: cdoFeather },
+    { keywords: ['claveria'], image: claveriaFeather },
+    { keywords: ['jasaan'], image: jasaanFeather },
+    { keywords: ['villanueva'], image: villanuevaFeather },
+    { keywords: ['alubijid'], image: alubijidFeather },
+    { keywords: ['oroquieta'], image: oroquietaFeather },
+    { keywords: ['panaon'], image: panaonFeather },
+];
+
+const campusFeatherColorMap: { keywords: string[]; color: string }[] = [
+    { keywords: ['alubijid'], color: '#FF3131' },
+    { keywords: ['cdo', 'cagayan de oro'], color: '#004AAD' },
+    { keywords: ['panaon'], color: '#8C52FF' },
+    { keywords: ['claveria'], color: '#FFDE59' },
+    { keywords: ['jasaan'], color: '#FF66C4' },
+    { keywords: ['oroquieta'], color: '#FF914D' },
+    { keywords: ['villanueva'], color: '#000000' },
+];
+
+const GENERIC_FEATHER_DURATION_MS = 3000;
+const CAMPUS_FEATHER_PREVIEW_MS = 1200;
 
 export default function Landing() {
 
@@ -35,7 +87,7 @@ export default function Landing() {
     const toggleCampusModal = () => setCampusModal(!campusModal);
     const [mapLayerModal, setMapLayerModal] = useState<boolean>(false);
     const toggleMapLayerModal = () => setMapLayerModal(!mapLayerModal);
-    const [selectedMapLayer, setSelectedMapLayer] = useState<string>('satellite');
+    const [selectedMapLayer, setSelectedMapLayer] = useState<string>('esri');
     const [currentSearchedSpecies, setCurrentSearchedSpecies] = useState<ICampusSpecies | null>(null);
 
     const date = new Date();
@@ -46,6 +98,7 @@ export default function Landing() {
     const toggleShowPanel = () => setShowPanel(!showPanel);
     const [selectedCampusData, setSelectedCampusData] = useState<ICampus | null>(null);
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
+    const [showCampusFeather, setShowCampusFeather] = useState<boolean>(false);
 
     // Redirect to home if no campusId is provided
     useEffect(() => {
@@ -170,6 +223,40 @@ export default function Landing() {
         setSearchQuery(value);
     }
 
+    const getSpecieHeaderIcon = () => {
+        const category = specie?.speciesData?.category?.toLowerCase();
+        if (!category) {
+            return null;
+        }
+        return speciesModalIconMap[category] ?? null;
+    };
+
+    const getCampusTransitionFeather = () => {
+        const campusName = selectedCampusData?.campus?.toLowerCase() || '';
+        const matchedCampus = campusFeatherMap.find((item) =>
+            item.keywords.some((keyword) => campusName.includes(keyword))
+        );
+        return matchedCampus?.image ?? defaultFeather;
+    };
+
+    const getCampusFeatherByName = (campusName?: string) => {
+        const normalizedCampusName = campusName?.toLowerCase() || '';
+        const matchedCampus = campusFeatherMap.find((item) =>
+            item.keywords.some((keyword) => normalizedCampusName.includes(keyword))
+        );
+        return matchedCampus?.image ?? defaultFeather;
+    };
+
+    const getCampusTransitionTextColor = () => {
+        const campusName = selectedCampusData?.campus?.toLowerCase() || '';
+        const matchedCampus = campusFeatherColorMap.find((item) =>
+            item.keywords.some((keyword) => campusName.includes(keyword))
+        );
+        return matchedCampus?.color ?? '#004AAD';
+    };
+
+    const specieHeaderIcon = getSpecieHeaderIcon();
+
     const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
@@ -181,7 +268,8 @@ export default function Landing() {
             });
             if (foundSpecie) {
                 const category = foundSpecie.speciesData?.category?.toLowerCase();
-                window.location.href = `/map?campusId=${foundSpecie.campus}&coordinates=${foundSpecie.longitude},${foundSpecie.latitude}&category=${category}&zoom=20`;
+                const scientificName = encodeURIComponent(foundSpecie.speciesData?.scientificName || '');
+                window.location.href = `/map?campusId=${foundSpecie.campus}&coordinates=${foundSpecie.longitude},${foundSpecie.latitude}&category=${category}&scientificName=${scientificName}&zoom=20`;
                 setSearchQuery("");
                 toggleSearchModal();
             } else {
@@ -208,17 +296,24 @@ export default function Landing() {
     };
 
     useEffect(() => {
+        let swapTimeout: number | undefined;
+        let mapTimeout: number | undefined;
+
         if (!isInitialized) {
             setIsShowMap(false);
             setSelectedCampusData(null);
+            setShowCampusFeather(false);
 
             const loadData = async () => {
                 await getCampuses();
                 await getAllCampusSpecies();
                 setIsInitialized(true);
-                setTimeout(() => {
+                swapTimeout = window.setTimeout(() => {
+                    setShowCampusFeather(true);
+                }, GENERIC_FEATHER_DURATION_MS);
+                mapTimeout = window.setTimeout(() => {
                     setIsShowMap(true);
-                }, 3000);
+                }, GENERIC_FEATHER_DURATION_MS + CAMPUS_FEATHER_PREVIEW_MS);
             };
 
             loadData();
@@ -226,6 +321,12 @@ export default function Landing() {
 
         return () => {
             setIsShowMap(false);
+            if (swapTimeout) {
+                clearTimeout(swapTimeout);
+            }
+            if (mapTimeout) {
+                clearTimeout(mapTimeout);
+            }
         }
     }, [isInitialized, getCampuses, getAllCampusSpecies]);
 
@@ -248,7 +349,24 @@ export default function Landing() {
         <Fragment>
             {
                 speciesModal && (
-                    <Modal title={`${specie?.speciesData?.commonName}`} isOpen={speciesModal} onClose={toggleSpeciesModal} modalContainerClassName="w-full max-w-[95vw] sm:max-w-4xl lg:max-w-5xl" titleClass="text-base sm:text-xl font-medium text-gray-900 ml-2 sm:ml-5">
+                    <Modal
+                        title={
+                            <div className="flex items-center gap-2">
+                                {specieHeaderIcon && (
+                                    <img
+                                        src={specieHeaderIcon}
+                                        alt={specie?.speciesData?.category || 'species icon'}
+                                        className="w-9 h-9 rounded-full bg-white p-1"
+                                    />
+                                )}
+                                <span>{specie?.speciesData?.commonName}</span>
+                            </div>
+                        }
+                        isOpen={speciesModal}
+                        onClose={toggleSpeciesModal}
+                        modalContainerClassName="w-full max-w-[95vw] sm:max-w-4xl lg:max-w-5xl"
+                        titleClass="text-base sm:text-xl font-medium text-white ml-2 sm:ml-5"
+                    >
                         <SpeciesDetails specie={specie?.speciesData ?? undefined} />
                     </Modal>
                 )
@@ -258,14 +376,14 @@ export default function Landing() {
                     <Modal
                         title={
                             <div className="flex items-center gap-2">
-                                <FaSearch size={20} className="text-red-500" />
+                                <FaSearch size={20} className="text-white" />
                                 <span>Search Species</span>
                             </div>
                         }
                         isOpen={searchModal}
                         onClose={toggleSearchModal}
                         modalContainerClassName="max-w-2xl"
-                        titleClass="text-xl font-medium text-gray-900 ml-5"
+                        titleClass="text-xl font-medium text-white ml-5"
                     >
                         <div className="p-4 sm:p-6">
                             <div className="mb-4">
@@ -290,7 +408,8 @@ export default function Landing() {
                                                     key={index}
                                                     onClick={() => {
                                                         const category = specie.speciesData?.category?.toLowerCase();
-                                                        window.location.href = `/map?campusId=${specie.campus}&coordinates=${specie.longitude},${specie.latitude}&category=${category}&zoom=20`;
+                                                        const scientificName = encodeURIComponent(specie.speciesData?.scientificName || '');
+                                                        window.location.href = `/map?campusId=${specie.campus}&coordinates=${specie.longitude},${specie.latitude}&category=${category}&scientificName=${scientificName}&zoom=20`;
                                                         setSearchQuery("");
                                                         toggleSearchModal();
                                                     }}
@@ -338,7 +457,22 @@ export default function Landing() {
             }
             {
                 campusModal && (
-                    <Modal title="Select Campus" isOpen={campusModal} onClose={toggleCampusModal} modalContainerClassName="max-w-2xl" titleClass="text-xl font-medium text-gray-900 ml-5">
+                    <Modal
+                        title={
+                            <div className="flex items-center gap-2">
+                                <img
+                                    src={defaultFeather}
+                                    alt="Feather icon"
+                                    className="w-10 h-10 rounded-full bg-white p-1"
+                                />
+                                <span>Select Campus</span>
+                            </div>
+                        }
+                        isOpen={campusModal}
+                        onClose={toggleCampusModal}
+                        modalContainerClassName="max-w-2xl"
+                        titleClass="text-xl font-medium text-white ml-5"
+                    >
                         <div className="p-4 sm:p-6">
                             <div className="grid grid-cols-1 gap-2 sm:gap-3">
                                 {campuses.map((campus, index) => (
@@ -351,10 +485,10 @@ export default function Landing() {
                                             }`}
                                     >
                                         <div className="flex items-start gap-3">
-                                            <BiMapPin
-                                                size={24}
-                                                className="mt-1 flex-shrink-0"
-                                                color={campus.id?.toString() === selectedCampusId?.toString() ? '#16a34a' : '#9ca3af'}
+                                            <img
+                                                src={getCampusFeatherByName(campus.campus)}
+                                                alt={`${campus.campus} feather`}
+                                                className="w-10 h-10 mt-1 flex-shrink-0 object-contain rounded-full bg-white p-1"
                                             />
                                             <div className="flex-1">
                                                 <div className="font-semibold text-base sm:text-lg text-gray-800">
@@ -379,24 +513,26 @@ export default function Landing() {
                     <Modal
                         title={
                             <div className="flex items-center gap-2">
-                                <FaLayerGroup size={20} className="text-green-600" />
+                                <FaLayerGroup size={20} className="text-white" />
                                 <span>Select Map Layer</span>
                             </div>
                         }
                         isOpen={mapLayerModal}
                         onClose={toggleMapLayerModal}
                         modalContainerClassName="max-w-lg"
-                        titleClass="text-xl font-medium text-gray-900 ml-5"
+                        titleClass="text-xl font-medium text-white ml-5"
                     >
                         <div className="p-4 sm:p-6">
                             <div className="grid grid-cols-1 gap-2 sm:gap-3">
                                 {[
+                                    { id: 'esri', name: 'Esri Satellite', description: 'High-resolution satellite imagery - Free, shows vegetation and land cover' },
+                                    { id: 'gbif', name: 'GBIF', description: 'OpenMapTiles style - Best for biodiversity with clear natural features' },
+                                    { id: 'satellite', name: 'Satellite', description: 'Satellite imagery with labels - Shows actual vegetation' },
                                     { id: 'outdoor', name: 'Outdoor', description: 'Detailed outdoor map with terrain features' },
-                                    { id: 'satellite', name: 'Satellite', description: 'Satellite imagery with labels' },
-                                    { id: 'base', name: 'Base', description: 'Simple base map with minimal details' },
-                                    { id: 'streets', name: 'Streets', description: 'Street map with roads and labels' },
                                     { id: 'landscape', name: 'Landscape', description: 'Natural landscape features and terrain' },
                                     { id: 'topo', name: 'Topo', description: 'Topographic map with contour lines' },
+                                    { id: 'streets', name: 'Streets', description: 'Street map with roads and labels' },
+                                    { id: 'base', name: 'Base', description: 'Simple base map with minimal details' },
                                     { id: 'dataviz', name: 'Dataviz', description: 'High contrast map optimized for data visualization' }
                                 ].map((layer) => (
                                     <button
@@ -441,22 +577,21 @@ export default function Landing() {
                         backgroundColor: 'white'
                     }}>
                         <div className="transition-content flex flex-col items-center justify-center">
-                            <img src={USTPLogo} alt="USTP Logo" className="w-32 h-32 mb-6 animate-pulse" />
-                            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                                USTP Biodiversity
-                            </h1>
-                            <div className="text-center mt-4 p-6 bg-green-50 rounded-lg shadow-md max-w-md min-w-[300px]">
-                                {selectedCampusData ? (
+                            <img src={USTPLogo} alt="USTP Logo" className="w-32 h-32 mb-6" />
+                            <img src={biodiversityLogo} alt="Biodiversity" className="w-72 sm:w-96 md:w-[30rem] mb-2 object-contain" />
+                            <div className="campus-transition-stage mt-6 mb-4" aria-hidden="true">
+                                <img
+                                    src={showCampusFeather ? getCampusTransitionFeather() : defaultFeather}
+                                    alt=""
+                                    className={showCampusFeather ? 'campus-feather-reveal' : 'feather-zoom-rotate'}
+                                />
+                            </div>
+                            <div className="text-center mt-4 p-2 max-w-md min-w-[300px]">
+                                {selectedCampusData && showCampusFeather ? (
                                     <>
-                                        <p className="text-sm text-gray-500 mb-2">Transitioning to</p>
-                                        <h2 className="text-2xl font-semibold text-green-700">
+                                        <h2 className="text-4xl sm:text-5xl font-bold leading-tight" style={{ color: getCampusTransitionTextColor() }}>
                                             {selectedCampusData.campus}
                                         </h2>
-                                        {selectedCampusData.address && (
-                                            <p className="text-sm text-gray-600 mt-2">
-                                                {selectedCampusData.address}
-                                            </p>
-                                        )}
                                     </>
                                 ) : (
                                     <>
@@ -464,7 +599,7 @@ export default function Landing() {
                                             Loading campus information...
                                         </p>
                                         <div className="mt-3 flex justify-center">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-700"></div>
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
                                         </div>
                                     </>
                                 )}
@@ -525,7 +660,7 @@ export default function Landing() {
                                                 onClick={toggleSearchModal}
                                                 className="btn btn-xs sm:btn-sm h-8 sm:h-10 px-2 sm:px-3 gap-1 sm:gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
                                             >
-                                                <FaSearch size={14} className="sm:w-4 sm:h-4" color="red" />
+                                                <FaSearch size={14} className="sm:w-4 sm:h-4" color="green" />
                                                 <span className="text-xs sm:text-sm">Search</span>
                                             </button>
                                         </div>
@@ -559,7 +694,7 @@ export default function Landing() {
                                             onClick={toggleCampusModal}
                                             className="btn btn-xs sm:btn-sm h-8 sm:h-10 px-2 sm:px-3 gap-1 sm:gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"
                                         >
-                                            <BiMapPin size={16} className="sm:w-5 sm:h-5" color="red" />
+                                            <BiMapPin size={16} className="sm:w-5 sm:h-5" color="green" />
                                             <span className="text-xs sm:text-sm font-semibold">
                                                 {campuses.find(c => c.id?.toString() === selectedCampusId?.toString())?.campus || 'Select'}
                                             </span>
@@ -585,6 +720,7 @@ export default function Landing() {
                                     campusId={campusId}
                                     coordinatesParams={coordinatesParams}
                                     categoryParam={searchParams.get('category')}
+                                    scientificNameParam={searchParams.get('scientificName')}
                                     zoomLevel={Number(searchParams.get('zoom')) !== 0 ? Number(searchParams.get('zoom')) : 40}
                                 />
                             </main>
