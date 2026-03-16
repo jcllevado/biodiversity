@@ -368,7 +368,7 @@ export default function Landing() {
                         closeButtonClassName="text-green-700 bg-transparent hover:bg-green-100"
                         bodyClassName="bg-cover bg-center bg-no-repeat"
                         bodyStyle={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.76), rgba(255,255,255,0.76)), url(${ustpBioBackground})` }}
-                        titleClass="text-base sm:text-xl font-medium text-gray-900 ml-2 sm:ml-5"
+                        titleClass="text-lg sm:text-2xl font-semibold text-gray-900 ml-2 sm:ml-5"
                     >
                         <SpeciesDetails specie={specie?.speciesData ?? undefined} />
                     </Modal>
@@ -388,7 +388,7 @@ export default function Landing() {
                         modalContainerClassName="max-w-2xl"
                         headerClassName="bg-green-50 border-b-2 border-green-600"
                         closeButtonClassName="text-green-700 bg-transparent hover:bg-green-100"
-                        titleClass="text-xl font-medium text-gray-900 ml-5"
+                        titleClass="text-2xl font-semibold text-gray-900 ml-5"
                     >
                         <div className="p-4 sm:p-6">
                             <div className="mb-4">
@@ -478,7 +478,7 @@ export default function Landing() {
                         modalContainerClassName="max-w-2xl"
                         headerClassName="bg-green-50 border-b-2 border-green-600"
                         closeButtonClassName="text-green-700 bg-transparent hover:bg-green-100"
-                        titleClass="text-xl font-medium text-gray-900 ml-5"
+                        titleClass="text-2xl font-semibold text-gray-900 ml-5"
                     >
                         <div className="p-4 sm:p-6">
                             <div className="grid grid-cols-1 gap-2 sm:gap-3">
@@ -529,7 +529,7 @@ export default function Landing() {
                         modalContainerClassName="max-w-lg"
                         headerClassName="bg-green-50 border-b-2 border-green-600"
                         closeButtonClassName="text-green-700 bg-transparent hover:bg-green-100"
-                        titleClass="text-xl font-medium text-gray-900 ml-5"
+                        titleClass="text-2xl font-semibold text-gray-900 ml-5"
                     >
                         <div className="p-4 sm:p-6">
                             <div className="grid grid-cols-1 gap-2 sm:gap-3">

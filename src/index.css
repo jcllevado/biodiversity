@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,6 +8,12 @@
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+}
+
+body {
+  font-family: 'Source Sans 3', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.55;
+  color: #1f2937;
 }
 
 #root{
