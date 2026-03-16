@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState, useCallback } from "react";
 import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import MapComponent from "../../core/components/map";
-import { IoMenu, IoClose, IoHome } from "react-icons/io5";
+import { IoClose, IoHome } from "react-icons/io5";
 import { BiMapPin } from "react-icons/bi";
 import { FaSearch, FaLayerGroup } from "react-icons/fa";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -91,12 +91,9 @@ export default function Landing() {
     const [selectedMapLayer, setSelectedMapLayer] = useState<string>('esri');
     const [currentSearchedSpecies, setCurrentSearchedSpecies] = useState<ICampusSpecies | null>(null);
 
-    const date = new Date();
-    const [showPanel, setShowPanel] = useState<boolean>(false);
     // const [showModal, setShowModal] = useState<boolean>(false);
     const [isShowMap, setIsShowMap] = useState<boolean>(false);
     // const toggleShowModal = () => setShowModal(!showModal);
-    const toggleShowPanel = () => setShowPanel(!showPanel);
     const [selectedCampusData, setSelectedCampusData] = useState<ICampus | null>(null);
     const [showCampusFeather, setShowCampusFeather] = useState<boolean>(false);
 
@@ -625,41 +622,9 @@ export default function Landing() {
                     <div className="flex flex-1 flex-col md:flex-row overflow-x-hidden">
                         <div className="w-full h-screen flex">
                             <div className="z-20 absolute w-full flex flex-row justify-start">
-                                {showPanel && (
-                                    <aside className="flex flex-col bg-white h-screen w-full sm:w-80 flex-start items-start border-l-2">
-                                        <div className="p-2 flex flex-col h-full justify-start items-center gap-2 overflow-y-auto">
-                                            <img src={USTPLogo} alt="USTP Logo" className="w-20 h-20 mt-20" />
-                                            <p className="p-2 text-sm text-center">University of Science and Technology of Southern Philippines</p>
-                                            <div className="text-justify p-2 text-sm space-y-3">
-                                                <p>
-                                                    USTP Biodiversity App is a comprehensive digital initiative designed to document, monitor, and celebrate the rich biological diversity found across the University of Science and Technology of Southern Philippines campuses.
-                                                </p>
-                                                <p>
-                                                    This serves as an interactive repository showcasing various species of flora and fauna that inhabit our university grounds. From native trees and vibrant butterflies to diverse bird species and unique insects, each entry provides valuable insights into the ecological wealth of our region.
-                                                </p>
-                                                <p>This initiative aims to:</p>
-                                                <ul className="list-disc pl-5 space-y-1">
-                                                    <li>Promote environmental awareness and conservation among students and faculty</li>
-                                                    <li>Provide educational resources for research and learning</li>
-                                                    <li>Document and preserve knowledge about local biodiversity</li>
-                                                    <li>Foster appreciation for our natural heritage</li>
-                                                </ul>
-                                                <p>
-                                                    Explore the interactive maps below to discover the biodiversity of each USTP campus.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="w-full text-center mb-2 text-xs">
-                                            Copyright &copy; {date.getFullYear()} USTP Biodiversity Project
-                                        </div>
-                                    </aside>
-                                )}
                                 <div className="flex flex-1 flex-row w-full justify-between items-start py-2 gap-2 px-2">
                                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                                         <div className="flex flex-row items-center gap-1 sm:gap-2">
-                                            <button className="btn btn-ghost btn-xs sm:btn-sm p-1 sm:p-2 min-h-0 h-8 sm:h-10" onClick={toggleShowPanel}>
-                                                <IoMenu size={24} className="sm:w-[30px] sm:h-[30px]" color="white" />
-                                            </button>
                                             <button
                                                 onClick={handleBackToHome}
                                                 className="btn btn-xs sm:btn-sm h-8 sm:h-10 px-2 sm:px-3 gap-1 sm:gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300"

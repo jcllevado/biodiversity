@@ -30,6 +30,12 @@ body {
   filter: brightness(1.12) contrast(1.08) saturate(1.08);
 }
 
+@media (max-width: 640px) {
+  .leaflet-control-attribution {
+    display: none !important;
+  }
+}
+
 /* Hide scrollbar for Chrome, Safari and Opera */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
