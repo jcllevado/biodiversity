@@ -31,12 +31,34 @@ type MapComponentProps = {
 
 
 // Define a custom icon
-const schoolIcon = L.icon({
-    iconUrl: schoolPin, // URL to your custom icon
-    iconSize: [50, 50], // Size of the icon [width, height]
-    iconAnchor: [25, 50], // Anchor point of the icon [x, y] - centered bottom
-    popupAnchor: [0, -50], // Anchor for the popup [x, y]
-});
+const escapeHtml = (value: string) => {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
+const createSchoolIcon = (campusName: string) => {
+    const formattedCampusName = `${campusName.toUpperCase()} CAMPUS`;
+    const safeName = escapeHtml(formattedCampusName);
+
+    return L.divIcon({
+        className: 'custom-school-icon',
+        html: `
+            <div style="display:flex;flex-direction:column;align-items:center;transform:translateY(-8px);">
+                <img src="${schoolPin}" style="width:44px;height:44px;object-fit:contain;" alt="School marker" />
+                <span style="margin-top:2px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,0.92);border:1px solid #d1d5db;color:#1f2937;font-size:10px;font-weight:600;line-height:1;white-space:nowrap;">
+                    ${safeName}
+                </span>
+            </div>
+        `,
+        iconSize: [96, 64],
+        iconAnchor: [48, 52],
+        popupAnchor: [0, -50],
+    });
+};
 
 // Map category icons
 const categoryIconMap: Record<string, string> = {
@@ -270,11 +292,11 @@ const MapComponent: FC<MapComponentProps> = ({
                             <Marker
                                 key={index}
                                 position={[Number(campus.longitude), Number(campus.latitude)]}
-                                icon={schoolIcon}
+                                icon={createSchoolIcon(campus.campus)}
                             >
                                 <Tooltip>
                                     <div>
-                                        <strong>{campus.campus} Campus</strong>
+                                        <strong>{campus.campus.toUpperCase()} CAMPUS</strong>
                                     </div>
                                 </Tooltip>
                             </Marker>
