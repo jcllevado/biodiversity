@@ -88,7 +88,7 @@ export default function Landing() {
     const toggleCampusModal = () => setCampusModal(!campusModal);
     const [mapLayerModal, setMapLayerModal] = useState<boolean>(false);
     const toggleMapLayerModal = () => setMapLayerModal(!mapLayerModal);
-    const [selectedMapLayer, setSelectedMapLayer] = useState<string>('esri');
+    const [selectedMapLayer, setSelectedMapLayer] = useState<string>('stadia');
     const [currentSearchedSpecies, setCurrentSearchedSpecies] = useState<ICampusSpecies | null>(null);
 
     const date = new Date();
@@ -534,6 +534,7 @@ export default function Landing() {
                         <div className="p-4 sm:p-6">
                             <div className="grid grid-cols-1 gap-2 sm:gap-3">
                                 {[
+                                    { id: 'stadia', name: 'Stadia', description: 'Satellite imagery from Stadia with terrain context for habitat visibility' },
                                     { id: 'esri', name: 'Esri Satellite', description: 'High-resolution satellite imagery - Free, shows vegetation and land cover' },
                                     { id: 'gbif', name: 'GBIF', description: 'OpenMapTiles style - Best for biodiversity with clear natural features' },
                                     { id: 'satellite', name: 'Satellite', description: 'Satellite imagery with labels - Shows actual vegetation' },
