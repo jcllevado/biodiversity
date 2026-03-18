@@ -13,6 +13,7 @@ import butterflyIcon from '../../../../assets/pngs/butterfly.png'
 import dragonflyIcon from '../../../../assets/pngs/dragonfly.png'
 import damselflyIcon from '../../../../assets/pngs/damselfly.png'
 import frogIcon from '../../../../assets/pngs/frog.png'
+import macroInvertsIcon from '../../../../assets/pngs/macro_inverts.png'
 import { ICampus, ICampusSpecies } from '../../interfaces/common.interface';
 import fallbackImage from "../../../../assets/fallback-image.jpg";
 import { SpeciesCategory } from '../../enums/species';
@@ -70,6 +71,7 @@ const categoryIconMap: Record<string, string> = {
     [SpeciesCategory.DRAGONFLY]: dragonflyIcon,
     [SpeciesCategory.DAMSELFLY]: damselflyIcon,
     [SpeciesCategory.FROGS]: frogIcon,
+    [SpeciesCategory.MACRO_INVERTS]: macroInvertsIcon,
 };
 
 // Get category icon for filter button
@@ -212,7 +214,7 @@ const MapComponent: FC<MapComponentProps> = ({
                                     alt={category}
                                     className="hidden sm:inline w-4 h-4 sm:w-5 sm:h-5"
                                 />
-                                <span>{category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                                <span>{category === SpeciesCategory.MACRO_INVERTS ? 'Macro Inverts' : category.charAt(0).toUpperCase() + category.slice(1)}</span>
                             </button>
                         ))}
                         <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap w-full sm:w-auto text-center sm:text-left sm:ml-1 font-medium">

@@ -15,6 +15,7 @@ import butterflyIcon from '../../../assets/pngs/butterfly.png';
 import dragonflyIcon from '../../../assets/pngs/dragonfly.png';
 import damselflyIcon from '../../../assets/pngs/damselfly.png';
 import frogIcon from '../../../assets/pngs/frog.png';
+import macroInvertIcon from '../../../assets/pngs/macro_inverts.png';
 import defaultFeather from '../../../assets/feathers/Feathers.png';
 import biodiversityLogo from '../../../assets/biodiversity-green.png';
 import ustpBioBackground from '../../../assets/ustp-bio.jpg';
@@ -39,6 +40,7 @@ const speciesModalIconMap: Record<string, string> = {
     [SpeciesCategory.DRAGONFLY]: dragonflyIcon,
     [SpeciesCategory.DAMSELFLY]: damselflyIcon,
     [SpeciesCategory.FROGS]: frogIcon,
+    [SpeciesCategory.MACRO_INVERTS]: macroInvertIcon,
 };
 
 const campusFeatherMap: { keywords: string[]; image: string }[] = [

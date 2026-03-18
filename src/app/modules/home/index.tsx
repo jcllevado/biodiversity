@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import { BiMapPin } from "react-icons/bi";
 import { BiNavigation } from "react-icons/bi";
 import { BiPhone } from "react-icons/bi";
@@ -32,6 +33,7 @@ import {
     USTP_CLAVERIA_CHANCELLOR_MESSAGE,
     USTP_PRESIDENT_MESSAGE,
 } from './constants/leader-messages/index';
+import { team as teamMembers } from "./constants/team";
 
 const MIN_LOADING_DELAY_MS = 1200;
 const CAROUSEL_INTERVAL_MS = 3600;
@@ -50,13 +52,7 @@ const speciesCarouselImages = [
     { src: alibangbangCover, alt: 'Alibangbang cover' },
     { src: huniCover, alt: 'Huni cover' },
 ];
-
-const teamMembers = Array.from({ length: 32 }, (_, index) => ({
-    id: index + 1,
-    name: `Team Member ${index + 1}`,
-    role: 'Project Contributor',
-}));
-
+ 
 export default function Home() {
     const navigate = useNavigate();
     const [campuses, setCampuses] = useState<ICampus[]>([]);
@@ -229,18 +225,18 @@ export default function Home() {
                                     />
                                 </button>
                             </div>
-                            <div className="mt-4 mb-2 flex items-center justify-center gap-3">
+                            <div className="mt-4 mb-2 flex w-full flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setCampusModalOpen(true)}
-                                    className="rounded-xl bg-[#003DA5] text-white font-bold py-3 px-5 hover:bg-[#0E4DB8] transition-colors inline-flex items-center justify-center gap-2"
+                                    className="w-full sm:w-auto rounded-xl bg-[#003DA5] text-white font-bold py-3 px-5 text-sm sm:text-base leading-tight hover:bg-[#0E4DB8] transition-colors inline-flex items-center justify-center gap-2"
                                 >
                                     <BiMapPin className="text-lg" />
                                     Explore Our Campuses
                                 </button>
                                 <button
                                     type="button"
-                                    className="rounded-xl bg-[#F2A900] text-gray-900 font-bold py-3 px-5 hover:bg-[#E69500] transition-colors inline-flex items-center justify-center gap-2"
+                                    className="w-full sm:w-auto rounded-xl bg-[#F2A900] text-gray-800 font-semibold py-3 px-5 text-sm sm:text-base leading-tight hover:bg-[#E69500] transition-colors inline-flex items-center justify-center gap-2"
                                 >
                                     <BiPhone className="text-lg" />
                                     Order our Coffee Table
@@ -301,9 +297,17 @@ export default function Home() {
 
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                                     {teamMembers.map((member) => (
-                                        <div key={member.id} className="border border-gray-200 rounded-xl p-3 text-center bg-white hover:bg-[#003DA5]/5 transition-colors">
-                                            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center">
-                                                <span className="text-[10px] sm:text-xs font-semibold text-gray-500">Photo</span>
+                                        <div key={member.name} className="border border-gray-200 rounded-xl p-3 text-center bg-white hover:bg-[#003DA5]/5 transition-colors">
+                                            <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full border-2 bg-gray-50 flex items-center justify-center ${member.photo ? 'border-gray-200' : 'border-dashed border-gray-300'}`}>
+                                                {member.photo ? (
+                                                    <img
+                                                        src={member.photo}
+                                                        alt={member.name}
+                                                        className="w-full h-full rounded-full object-cover object-center p-1"
+                                                    />
+                                                ) : (
+                                                    <FaUser className="text-gray-400 text-2xl sm:text-3xl" aria-label="No photo available" />
+                                                )}
                                             </div>
                                             <p className="mt-2 text-xs sm:text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{member.name}</p>
                                             <p className="text-[10px] sm:text-xs text-gray-500 mt-1">{member.role}</p>
@@ -315,18 +319,17 @@ export default function Home() {
                             <footer className="mt-2">
                                 <div className="px-1 py-3 text-center">
                                     <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                                        © {new Date().getFullYear()} University of Science and Technology of Southern Philippines.
+                                        © {new Date().getFullYear()}  
+                                        <a
+                                            href="https://ustp.edu.ph/"
+                                            className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        > 
+                                        &nbsp;University of Science and Technology of Southern Philippines.&nbsp;
+                                         </a>
                                         All rights reserved.
-                                    </p>
-                                    <a
-                                        href="https://ustp.edu.ph/"
-                                        className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        Visit USTP Website
-                                        <FaExternalLinkAlt size={10} />
-                                    </a>
+                                    </p> 
                                 </div>
                             </footer>
                         </section>

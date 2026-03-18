@@ -7,6 +7,7 @@ export enum SpeciesCategory {
   DAMSELFLY = "damselfly",
   DRAGONFLY = "dragonfly",
   FROGS = "frogs",
+  MACRO_INVERTS = "macro_inverts",
 }
 
 export const animalsList = ["birds", "frogs", "bats"];
