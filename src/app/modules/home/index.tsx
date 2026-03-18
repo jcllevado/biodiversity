@@ -295,21 +295,21 @@ export default function Home() {
                             <article id="team-members" className="p-6 sm:p-8">
                                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5">Team Members</h3>
 
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+                                <div className="grid grid-cols-4 gap-5 sm:gap-6">
                                     {teamMembers.map((member) => (
-                                        <div key={member.name} className="border border-gray-200 rounded-xl p-3 text-center bg-white hover:bg-[#003DA5]/5 transition-colors">
-                                            <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full border-2 bg-gray-50 flex items-center justify-center ${member.photo ? 'border-gray-200' : 'border-dashed border-gray-300'}`}>
+                                        <div key={member.name} className="border border-gray-200 rounded-2xl p-5 sm:p-6 text-center bg-white hover:bg-[#003DA5]/5 transition-colors">
+                                            <div className={`w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full border-2 bg-gray-50 flex items-center justify-center ${member.photo ? 'border-gray-200' : 'border-dashed border-gray-300'}`}> 
                                                 {member.photo ? (
                                                     <img
                                                         src={member.photo}
                                                         alt={member.name}
-                                                        className="w-full h-full rounded-full object-cover object-center p-1"
+                                                        className="w-full h-full rounded-full object-cover object-center p-2"
                                                     />
                                                 ) : (
-                                                    <FaUser className="text-gray-400 text-2xl sm:text-3xl" aria-label="No photo available" />
+                                                    <FaUser className="text-gray-400 text-3xl sm:text-4xl" aria-label="No photo available" />
                                                 )}
                                             </div>
-                                            <p className="mt-2 text-xs sm:text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{member.name}</p>
+                                            <p className="mt-3 text-base sm:text-lg font-bold text-gray-800 leading-tight line-clamp-2">{member.name}</p>
                                             <p className="text-[10px] sm:text-xs text-gray-500 mt-1">{member.role}</p>
                                         </div>
                                     ))}
