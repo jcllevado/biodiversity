@@ -52,7 +52,7 @@ const speciesCarouselImages = [
     { src: alibangbangCover, alt: 'Alibangbang cover' },
     { src: huniCover, alt: 'Huni cover' },
 ];
- 
+
 export default function Home() {
     const navigate = useNavigate();
     const [campuses, setCampuses] = useState<ICampus[]>([]);
@@ -295,10 +295,10 @@ export default function Home() {
                             <article id="team-members" className="p-6 sm:p-8">
                                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5">Team Members</h3>
 
-                                <div className="grid grid-cols-4 gap-5 sm:gap-6">
+                                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                                     {teamMembers.map((member) => (
                                         <div key={member.name} className="border border-gray-200 rounded-2xl p-5 sm:p-6 text-center bg-white hover:bg-[#003DA5]/5 transition-colors">
-                                            <div className={`w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full border-2 bg-gray-50 flex items-center justify-center ${member.photo ? 'border-gray-200' : 'border-dashed border-gray-300'}`}> 
+                                            <div className={`w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full border-2 bg-gray-50 flex items-center justify-center ${member.photo ? 'border-gray-200' : 'border-dashed border-gray-300'}`}>
                                                 {member.photo ? (
                                                     <img
                                                         src={member.photo}
@@ -319,17 +319,17 @@ export default function Home() {
                             <footer className="mt-2">
                                 <div className="px-1 py-3 text-center">
                                     <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                                        © {new Date().getFullYear()}  
+                                        © {new Date().getFullYear()}
                                         <a
                                             href="https://ustp.edu.ph/"
                                             className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                        > 
-                                        &nbsp;University of Science and Technology of Southern Philippines.&nbsp;
-                                         </a>
+                                        >
+                                            &nbsp;University of Science and Technology of Southern Philippines.&nbsp;
+                                        </a>
                                         All rights reserved.
-                                    </p> 
+                                    </p>
                                 </div>
                             </footer>
                         </section>
