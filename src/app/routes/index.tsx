@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Home from "../modules/home";
 import Landing from "../modules/landing";
 import Admin from "../modules/admin";
+import AdminMapPreview from "../modules/admin-map-preview";
 import Notfound from "../modules/notfound";
 
 export const router = createBrowserRouter([
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
     {
         path: "/admin/campuses",
         element: <Admin />
+    },
+    {
+        path: "/admin/map-preview",
+        element: <AdminMapPreview />
     },
     {
         path: "*",

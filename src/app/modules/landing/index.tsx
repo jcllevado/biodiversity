@@ -204,7 +204,7 @@ export default function Landing() {
     const handleChangeCampus = (value: string) => {
         const campusData = campuses.find(campus => campus.id?.toString() === value.toString());
         if (campusData) {
-            window.location.href = `/map?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}&zoom=${campusData.zoom}`;
+            window.location.href = `/map?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}`;
             toggleCampusModal();
         }
     }
@@ -268,7 +268,7 @@ export default function Landing() {
             if (foundSpecie) {
                 const category = foundSpecie.speciesData?.category?.toLowerCase();
                 const scientificName = encodeURIComponent(foundSpecie.speciesData?.scientificName || '');
-                window.location.href = `/map?campusId=${foundSpecie.campus}&coordinates=${foundSpecie.longitude},${foundSpecie.latitude}&category=${category}&scientificName=${scientificName}&zoom=20`;
+                window.location.href = `/map?campusId=${foundSpecie.campus}&coordinates=${foundSpecie.longitude},${foundSpecie.latitude}&category=${category}&scientificName=${scientificName}`;
                 setSearchQuery("");
                 toggleSearchModal();
             } else {
@@ -288,8 +288,8 @@ export default function Landing() {
     const handleClearSearch = () => {
         const campus = campuses.find(c => c.id?.toString() === selectedCampusId?.toString());
         if (campus) {
-            // Navigate back to campus view with campus's default zoom level without reload
-            navigate(`/map?campusId=${campus.id}&coordinates=${campus.latitude},${campus.longitude}&zoom=${campus.zoom || 15}`, { replace: true });
+            // Navigate back to campus view without forcing URL-based zoom.
+            navigate(`/map?campusId=${campus.id}&coordinates=${campus.latitude},${campus.longitude}`, { replace: true });
         }
         setCurrentSearchedSpecies(null);
     };
@@ -413,7 +413,7 @@ export default function Landing() {
                                                     onClick={() => {
                                                         const category = specie.speciesData?.category?.toLowerCase();
                                                         const scientificName = encodeURIComponent(specie.speciesData?.scientificName || '');
-                                                        window.location.href = `/map?campusId=${specie.campus}&coordinates=${specie.longitude},${specie.latitude}&category=${category}&scientificName=${scientificName}&zoom=20`;
+                                                        window.location.href = `/map?campusId=${specie.campus}&coordinates=${specie.longitude},${specie.latitude}&category=${category}&scientificName=${scientificName}`;
                                                         setSearchQuery("");
                                                         toggleSearchModal();
                                                     }}
@@ -700,7 +700,6 @@ export default function Landing() {
                                     coordinatesParams={coordinatesParams}
                                     categoryParam={searchParams.get('category')}
                                     scientificNameParam={searchParams.get('scientificName')}
-                                    zoomLevel={Number(searchParams.get('zoom')) !== 0 ? Number(searchParams.get('zoom')) : 40}
                                 />
                             </main>
 

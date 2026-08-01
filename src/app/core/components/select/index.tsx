@@ -70,7 +70,14 @@ const Select: FC<TSelectProps> = ({
 
     const [selected, setSelected] = useState<string | number>(value ?? "");
     // Generate the CSS classes for the select element based on props
-    const selectClass = classNames(`select w-full select-bordered select-${variant}`, `select-${size}`, { "select-error": error }, className);
+    const selectClass = classNames(
+        "select w-full border border-gray-300 rounded-lg",
+        `select-${variant}`,
+        `select-${size}`,
+        "select-bordered",
+        { "select-error": error },
+        className,
+    );
 
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         onChange(e);
@@ -88,7 +95,6 @@ const Select: FC<TSelectProps> = ({
                 id={id}
                 value={selected ?? ""}
                 onChange={handleChange}
-                defaultValue={selected ?? ""}
                 className={selectClass}
                 onClick={onClick}
                 onBlur={onBlur}

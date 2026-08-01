@@ -24,7 +24,7 @@ const team = [
     photo: "/team/Walag.jpg",
     role: "Project Member",
   },
-  { name: "Dennis A. Mugot", photo: "", role: "Project Member" },
+  { name: "Dennis A. Mugot", photo: "/team/Mugot.png", role: "Project Member" },
   {
     name: "Queenilyn A. Piloton",
     photo: "/team/Piloton.jpg",
@@ -56,8 +56,16 @@ const team = [
     role: "Project Member",
   },
   { name: "Liza H. Calvis", photo: "/team/Calvis.jpg", role: "Project Member" },
-  { name: "Apolinario B. Gonzaga Jr.", photo: "", role: "Project Member" },
-  { name: "Renante D. Taylaran", photo: "", role: "Project Member" },
+  {
+    name: "Apolinario B. Gonzaga Jr.",
+    photo: "/team/Gonzaga.jpg",
+    role: "Project Member",
+  },
+  {
+    name: "Renante D. Taylaran",
+    photo: "/team/Taylaran.png",
+    role: "Project Member",
+  },
   {
     name: "John Preach C. Quirino",
     photo: "/team/Quirino.jpg",
@@ -66,6 +74,7 @@ const team = [
   { name: "Richel E. Relox", photo: "/team/Relox.jpg", role: "Project Member" },
   {
     name: "John Mikel M. Acma",
+    photo: "/team/Acma.png",
     role: "Project Member",
   },
   {

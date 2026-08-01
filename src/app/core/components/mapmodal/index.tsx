@@ -1,7 +1,8 @@
 import 'leaflet/dist/leaflet.css';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useMemo } from 'react';
+import type { GeoJsonObject } from 'geojson';
 import L, { LatLngExpression } from "leaflet";
-import { MapContainer, Marker, TileLayer, ZoomControl, Tooltip, useMapEvents, useMap } from "react-leaflet";
+import { GeoJSON, MapContainer, Marker, TileLayer, ZoomControl, Tooltip, useMapEvents, useMap } from "react-leaflet";
 import osmMaptiler from '../../constants/osm-maptiler';
 import schoolPin from '../../../../assets/schoolmap-pin.png'
 import mapPin from '../../../../assets/pin2.png'
@@ -10,6 +11,8 @@ import { ICampus } from '../../interfaces/common.interface';
 import { useCampusStore } from '../../zustand/campus';
 import React from 'react';
 import { supabase } from '../../lib/supabase';
+import { toast } from 'react-toastify';
+import { campusBoundaryMap } from '../../constants/boundaries';
 
 
 type MapComponentProps = {
@@ -65,12 +68,46 @@ const speciesIcon = L.icon({
     shadowAnchor: [10, 40]
 });
 
+const normalizeCampusName = (value?: string | null) => value?.toLowerCase().replace(/[^a-z0-9]+/g, '') ?? '';
+
+const getBoundaryKey = (value?: string | null) => {
+    const normalizedValue = normalizeCampusName(value);
+
+    if (!normalizedValue) return '';
+    if (normalizedValue.includes('ustpcdo') || normalizedValue.includes('cdo')) return 'ustpcdo';
+    if (normalizedValue.includes('ustpvillanueva') || normalizedValue.includes('villanueva')) return 'ustpvillanueva';
+    if (normalizedValue.includes('ustpclaveria') || normalizedValue.includes('claveria')) return 'ustpclaveria';
+    if (normalizedValue.includes('ustpjasaan') || normalizedValue.includes('jasaan')) return 'ustpjasaan';
+    if (normalizedValue.includes('ustporoquieta') || normalizedValue.includes('oroquieta')) return 'ustporoquieta';
+    if (normalizedValue.includes('ustppanaon') || normalizedValue.includes('panaon')) return 'ustppanaon';
+    if (normalizedValue.includes('ustpalubijid') || normalizedValue.includes('alubijid')) return 'ustpalubijid';
+
+    return normalizedValue;
+};
+
 const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, initialCoordinates, getLongLat }) => {
 
     const [coordinates, setCoordinates] = React.useState<LatLngExpression>([Number(campuses[0].longitude), Number(campuses[0].latitude)]);
     const { setCampus } = useCampusStore();
     const [pinLocation, setPinLocation] = React.useState<LatLngExpression | null>(initialCoordinates ?? null);
     const [campusSpecies, setCampusSpecies] = React.useState<CampusSpeciesData[]>([]);
+    const [isSavingMarker, setIsSavingMarker] = React.useState(false);
+
+    const selectedCampus = useMemo(
+        () => campuses.find((campus) => campus.id?.toString() === initialCampus.toString()),
+        [campuses, initialCampus]
+    );
+
+    const campusBoundaries = useMemo(() => {
+        const boundaryLookupCandidates = [
+            getBoundaryKey(initialCampus),
+            getBoundaryKey(selectedCampus?.campus),
+        ].filter(Boolean);
+
+        return Array.from(new Set(boundaryLookupCandidates))
+            .map((boundaryKey) => campusBoundaryMap[boundaryKey as keyof typeof campusBoundaryMap])
+            .filter(Boolean);
+    }, [initialCampus, selectedCampus?.campus]);
 
     const getAllCampusSpecies = async () => {
         try {
@@ -95,13 +132,14 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
 
             if (error) {
                 console.error('Error fetching campus species:', error);
+                toast.error('Unable to load campus species map points.');
                 return;
             }
 
-            console.log('Campus species data:', data);
             setCampusSpecies(data || []);
         } catch (error) {
             console.error('Error in getAllCampusSpecies:', error);
+            toast.error('Failed to fetch species coordinates.');
         }
     }
 
@@ -110,16 +148,52 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
     }, [initialCampus]);
 
     useEffect(() => {
-        const campus = campuses.find(campus => {
-            return campus.id?.toString() === initialCampus.toString();
-        });
+        const campus = campuses.find((campusData) => campusData.id?.toString() === initialCampus.toString());
         setCampus(campus ?? null);
         setCoordinates([Number(campus?.longitude), Number(campus?.latitude)]);
-    }, [initialCampus]);
+    }, [initialCampus, campuses, setCampus]);
+
+    const handleSpeciesDragEnd = (speciesId: number) => {
+        return async (event: L.DragEndEvent) => {
+            const marker = event.target as L.Marker;
+            const { lat, lng } = marker.getLatLng();
+
+            try {
+                setIsSavingMarker(true);
+
+                const { error } = await supabase
+                    .from('campus_species')
+                    .update({ latitude: lat, longitude: lng })
+                    .eq('id', speciesId);
+
+                if (error) {
+                    throw error;
+                }
+
+                setCampusSpecies((prev) => prev.map((item) => (
+                    item.id === speciesId
+                        ? { ...item, latitude: lat, longitude: lng }
+                        : item
+                )));
+
+                if (getLongLat) {
+                    getLongLat([lat, lng]);
+                }
+
+                setPinLocation([lat, lng]);
+                toast.success('Species coordinates updated.');
+            } catch (error) {
+                console.error('Error updating species coordinates:', error);
+                toast.error('Failed to update coordinates. Please try again.');
+            } finally {
+                setIsSavingMarker(false);
+            }
+        };
+    };
 
     const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
-        map.setView(coordinates, 40);
+        map.setView(coordinates, 17);
         return null;
     }
 
@@ -165,6 +239,18 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
                             key={`species-${index}`}
                             position={[Number(speciesData.latitude), Number(speciesData.longitude)]}
                             icon={speciesIcon}
+                            draggable
+                            eventHandlers={{
+                                dragend: handleSpeciesDragEnd(speciesData.id),
+                                click: () => {
+                                    const lat = Number(speciesData.latitude);
+                                    const lng = Number(speciesData.longitude);
+                                    setPinLocation([lat, lng]);
+                                    if (getLongLat) {
+                                        getLongLat([lat, lng]);
+                                    }
+                                },
+                            }}
                         >
                             <Tooltip>
                                 <div className="text-sm">
@@ -183,6 +269,19 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
                                 </div>
                             </Tooltip>
                         </Marker>
+                    ))}
+
+                    {campusBoundaries.map((boundary, index) => (
+                        <GeoJSON
+                            key={`boundary-${index}`}
+                            data={boundary as unknown as GeoJsonObject}
+                            style={{
+                                color: '#15803d',
+                                weight: 3,
+                                fillColor: '#86efac',
+                                fillOpacity: 0.2,
+                            }}
+                        />
                     ))}
 
                     {/* Selected location marker */}
@@ -206,8 +305,9 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
             </div>
 
             {/* Species count info */}
-            <div className="mt-2 text-sm text-gray-600">
-                Showing {campusSpecies.length} species locations on the map
+            <div className="mt-2 text-sm text-gray-600 flex items-center justify-between">
+                <span>Showing {campusSpecies.length} species locations on the map</span>
+                <span className="text-xs text-gray-500">Drag species pins to update coordinates{isSavingMarker ? ' (saving...)' : ''}</span>
             </div>
         </div>
     )

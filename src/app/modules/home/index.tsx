@@ -104,7 +104,7 @@ export default function Home() {
 
     const handleCampusSelect = (campus: ICampus) => {
         if (campus.id) {
-            navigate(`/map?campusId=${campus.id}&coordinates=${campus.latitude},${campus.longitude}&zoom=${campus.zoom || 15}`);
+            navigate(`/map?campusId=${campus.id}&coordinates=${campus.latitude},${campus.longitude}`);
         }
     }
 
@@ -239,7 +239,7 @@ export default function Home() {
                                     className="w-full sm:w-auto rounded-xl bg-[#F2A900] text-gray-800 font-semibold py-3 px-5 text-sm sm:text-base leading-tight hover:bg-[#E69500] transition-colors inline-flex items-center justify-center gap-2"
                                 >
                                     <BiPhone className="text-lg" />
-                                    Order our Coffee Table
+                                    Order our Field Guide
                                 </button>
                             </div>
                         </div>
